@@ -103,6 +103,7 @@ type pipeline_stage = [
   | `Stage1_Darvas
   | `Stage2_Piotroski
   | `Stage3_CoffeeCan
+  | `Stage4_CMF_Accumulation
 ]
 
 type pipeline_result = {
@@ -122,6 +123,41 @@ type triple_hit = {
   fundamentals: (string * float) list;
   confidence: float;      (* 0.0-1.0, based on how close each criterion *)
 }
+
+(* Accumulation analysis *)
+type accumulation_analysis = {
+  symbol: string;
+  cmf_20: float option;
+  cmf_50: float option;
+  status: string;  (* STRONG_ACCUMULATION, ACCUMULATION, NEUTRAL, DISTRIBUTION, STRONG_DISTRIBUTION *)
+  in_accumulation: bool;
+  confidence: float;  (* 0.0-1.0 *)
+}
+
+let analyze_accumulation stock =
+  let result = Merlin_lib.Screener.cmf_screen stock in
+  let cmf_20 = match List.assoc_opt "CMF_20" result.Merlin_lib.Screener.metrics with
+    | Some s -> (try Some (Float.of_string s) with _ -> None)
+    | None -> None
+  in
+  let cmf_50 = match List.assoc_opt "CMF_50" result.Merlin_lib.Screener.metrics with
+    | Some s -> (try Some (Float.of_string s) with _ -> None)
+    | None -> None
+  in
+  {
+    symbol = stock.Merlin_lib.Screener.symbol;
+    cmf_20;
+    cmf_50;
+    status = (match List.assoc_opt "Status" result.Merlin_lib.Screener.metrics with
+      | Some s -> s
+      | None -> "UNKNOWN");
+    in_accumulation = result.Merlin_lib.Screener.passed;
+    confidence = (match cmf_20 with
+      | Some c when c > 0.25 -> 0.95
+      | Some c when c > 0.05 -> 0.75
+      | Some c when c > -0.05 -> 0.50
+      | _ -> 0.25);
+  }
 
 (* Pipeline coordinator *)
 let run_pipeline market_code stocks =
@@ -181,6 +217,22 @@ let run_pipeline market_code stocks =
   printf "   ✓ %d/%d passed Coffee Can (%.0f ms)\n"
     (List.length triple_hits) (List.length piotroski_passes) stage3_time;
 
+  (* Stage 4: CMF Accumulation (volume confirmation for triple hits) *)
+  printf "📊 Stage 4: CMF Accumulation (Volume Confirmation)...\n";
+  let start_time = Unix.gettimeofday () in
+  let cmf_confirmed = List.filter (fun symbol ->
+    let result = Merlin_lib.Screener.cmf_screen {
+      symbol;
+      market = market_code;
+      ohlcv = [];
+      fundamentals = [];
+    } in
+    result.passed
+  ) triple_hits in
+  let stage4_time = (Unix.gettimeofday () -. start_time) *. 1000.0 in
+  printf "   ✓ %d/%d confirmed CMF accumulation (%.0f ms)\n"
+    (List.length cmf_confirmed) (List.length triple_hits) stage4_time;
+
   printf "\n🎯 PIPELINE RESULTS\n";
   printf "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
   printf "Market: %s\n" market.name;
@@ -191,11 +243,14 @@ let run_pipeline market_code stocks =
   printf "Piotroski strong: %d (%.1f%%)\n"
     (List.length piotroski_passes)
     (Float.of_int (List.length piotroski_passes) /. Float.of_int (List.length darvas_passes) *. 100.0);
-  printf "Triple Hits: %d (%.1f%%)\n"
+  printf "Coffee Can pass: %d (%.1f%%)\n"
     (List.length triple_hits)
-    (Float.of_int (List.length triple_hits) /. Float.of_int (List.length stocks) *. 100.0);
+    (Float.of_int (List.length triple_hits) /. Float.of_int (List.length piotroski_passes) *. 100.0);
+  printf "CMF Confirmed: %d (%.1f%%)\n"
+    (List.length cmf_confirmed)
+    (Float.of_int (List.length cmf_confirmed) /. Float.of_int (List.length triple_hits) *. 100.0);
 
-  triple_hits
+  cmf_confirmed
 
 (* Daily report generator *)
 let generate_daily_report market_code stocks =

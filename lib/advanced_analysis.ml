@@ -347,6 +347,54 @@ let iqr_outliers values =
       List.filter (fun v -> v < lower_bound || v > upper_bound) values
   | None -> []
 
+(* ── Volume Analysis (Chaikin Money Flow) ──────────────────────────────── *)
+
+type ohlcv = {
+  open_: float;
+  high: float;
+  low: float;
+  close: float;
+  volume: float;
+}
+
+let chaikin_money_flow candles period =
+  if List.length candles < period then None
+  else
+    let recent = List.filteri (fun i _ -> i >= List.length candles - period) candles in
+
+    let money_flow_values = List.map (fun candle ->
+      let high_low_diff = candle.high -. candle.low in
+      if high_low_diff = 0.0 then 0.0
+      else
+        let mf_multiplier = ((candle.close -. candle.low) -. (candle.high -. candle.close)) /. high_low_diff in
+        mf_multiplier *. candle.volume
+    ) recent in
+
+    let volume_sum = List.fold_left (fun acc c -> acc +. c.volume) 0.0 recent in
+    let mf_sum = List.fold_left (+.) 0.0 money_flow_values in
+
+    if volume_sum = 0.0 then None
+    else Some (mf_sum /. volume_sum)
+
+let is_accumulation cmf_value =
+  match cmf_value with
+  | None -> false
+  | Some cmf -> cmf > 0.05
+
+let is_strong_accumulation cmf_value =
+  match cmf_value with
+  | None -> false
+  | Some cmf -> cmf > 0.25
+
+let cmf_signal cmf_value =
+  match cmf_value with
+  | None -> "INSUFFICIENT_DATA"
+  | Some cmf when cmf > 0.25 -> "STRONG_ACCUMULATION"
+  | Some cmf when cmf > 0.05 -> "ACCUMULATION"
+  | Some cmf when cmf > -0.05 -> "NEUTRAL"
+  | Some cmf when cmf > -0.25 -> "DISTRIBUTION"
+  | Some _ -> "STRONG_DISTRIBUTION"
+
 (* ── Momentum & Trend Analysis ─────────────────────────────────────────── *)
 
 let rsi prices period =

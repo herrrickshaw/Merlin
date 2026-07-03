@@ -319,6 +319,52 @@ let golden_crossover_screen stock =
         note = "insufficient_data";
       }
 
+(* Strategy: Chaikin Money Flow (Accumulation Detection) *)
+let cmf_screen stock =
+  if List.length stock.ohlcv < 20 then
+    {
+      symbol = stock.symbol;
+      strategy = "cmf_accumulation";
+      passed = false;
+      score = None;
+      metrics = [];
+      note = "insufficient_data";
+    }
+  else
+    let candles = List.map (fun o ->
+      {
+        Advanced_analysis.open_ = o.open_;
+        high = o.high;
+        low = o.low;
+        close = o.close;
+        volume = o.volume;
+      }
+    ) stock.ohlcv in
+
+    let cmf_20 = Advanced_analysis.chaikin_money_flow candles 20 in
+    let cmf_50 = Advanced_analysis.chaikin_money_flow candles 50 in
+
+    let accumulated = Advanced_analysis.is_strong_accumulation cmf_20 in
+    let trend = Advanced_analysis.cmf_signal cmf_20 in
+
+    let score_val = match cmf_20 with
+      | Some c -> c
+      | None -> -1.0
+    in
+
+    {
+      symbol = stock.symbol;
+      strategy = "cmf_accumulation";
+      passed = accumulated;
+      score = Some score_val;
+      metrics = [
+        ("CMF_20", sprintf "%.4f" (match cmf_20 with Some c -> c | None -> 0.0));
+        ("CMF_50", sprintf "%.4f" (match cmf_50 with Some c -> c | None -> 0.0));
+        ("Status", trend);
+      ];
+      note = if accumulated then "ACCUMULATION_PHASE" else trend;
+    }
+
 (* Run all strategies *)
 let screen_stock stock =
   [
@@ -327,6 +373,7 @@ let screen_stock stock =
     coffee_can_screen stock;
     magic_formula_screen stock;
     golden_crossover_screen stock;
+    cmf_screen stock;
   ]
 
 (* Batch screening *)
