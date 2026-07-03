@@ -1,3 +1,4 @@
 (library
  (name merlin_lib)
- (libraries str yojson unix))
+ (libraries str yojson unix unix)
+ (modules data analyze uploader screener))

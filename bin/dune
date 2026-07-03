@@ -1,5 +1,5 @@
-(executable
- (name merlin)
- (public_name merlin)
+(executables
+ (names merlin screener)
+ (public_names merlin screener)
  (libraries merlin_lib str)
  (preprocess (pps ppx_deriving_yojson)))
