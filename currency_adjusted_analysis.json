@@ -1,0 +1,572 @@
+{
+  "sensitivities": [
+    {
+      "stock": "AAPL",
+      "sector": "Tech",
+      "usd_revenue_pct": 0.5,
+      "jpy_costs_pct": 0.05,
+      "net_usd_exposure": 0.45,
+      "beta_to_usd": 0.85,
+      "fx_category": "MEDIUM_USD_SENSITIVE"
+    },
+    {
+      "stock": "MSFT",
+      "sector": "Tech",
+      "usd_revenue_pct": 0.55,
+      "jpy_costs_pct": 0.03,
+      "net_usd_exposure": 0.52,
+      "beta_to_usd": 0.82,
+      "fx_category": "HIGH_USD_SENSITIVE"
+    },
+    {
+      "stock": "GOOGL",
+      "sector": "Tech",
+      "usd_revenue_pct": 0.6,
+      "jpy_costs_pct": 0.02,
+      "net_usd_exposure": 0.58,
+      "beta_to_usd": 0.88,
+      "fx_category": "HIGH_USD_SENSITIVE"
+    },
+    {
+      "stock": "NVDA",
+      "sector": "Tech",
+      "usd_revenue_pct": 0.7,
+      "jpy_costs_pct": 0.08,
+      "net_usd_exposure": 0.62,
+      "beta_to_usd": 0.9,
+      "fx_category": "HIGH_USD_SENSITIVE"
+    },
+    {
+      "stock": "META",
+      "sector": "Tech",
+      "usd_revenue_pct": 0.65,
+      "jpy_costs_pct": 0.04,
+      "net_usd_exposure": 0.61,
+      "beta_to_usd": 0.84,
+      "fx_category": "HIGH_USD_SENSITIVE"
+    },
+    {
+      "stock": "AMZN",
+      "sector": "Cloud",
+      "usd_revenue_pct": 0.4,
+      "jpy_costs_pct": 0.1,
+      "net_usd_exposure": 0.30000000000000004,
+      "beta_to_usd": 0.75,
+      "fx_category": "MILD_USD_SENSITIVE"
+    },
+    {
+      "stock": "CRM",
+      "sector": "SaaS",
+      "usd_revenue_pct": 0.45,
+      "jpy_costs_pct": 0.06,
+      "net_usd_exposure": 0.39,
+      "beta_to_usd": 0.78,
+      "fx_category": "MEDIUM_USD_SENSITIVE"
+    },
+    {
+      "stock": "TSLA",
+      "sector": "Auto",
+      "usd_revenue_pct": 0.35,
+      "jpy_costs_pct": 0.15,
+      "net_usd_exposure": 0.19999999999999998,
+      "beta_to_usd": 0.7,
+      "fx_category": "NEUTRAL_OR_JPY_EXPOSED"
+    },
+    {
+      "stock": "NFLX",
+      "sector": "Media",
+      "usd_revenue_pct": 0.55,
+      "jpy_costs_pct": 0.05,
+      "net_usd_exposure": 0.5,
+      "beta_to_usd": 0.8,
+      "fx_category": "HIGH_USD_SENSITIVE"
+    },
+    {
+      "stock": "ADBE",
+      "sector": "Software",
+      "usd_revenue_pct": 0.5,
+      "jpy_costs_pct": 0.04,
+      "net_usd_exposure": 0.46,
+      "beta_to_usd": 0.83,
+      "fx_category": "MEDIUM_USD_SENSITIVE"
+    }
+  ],
+  "portfolio_analysis": {
+    "stocks": [
+      {
+        "stock": "AAPL",
+        "sector": "Tech",
+        "usd_revenue_pct": 0.5,
+        "jpy_costs_pct": 0.05,
+        "net_usd_exposure": 0.45,
+        "beta_to_usd": 0.85,
+        "fx_category": "MEDIUM_USD_SENSITIVE"
+      },
+      {
+        "stock": "MSFT",
+        "sector": "Tech",
+        "usd_revenue_pct": 0.55,
+        "jpy_costs_pct": 0.03,
+        "net_usd_exposure": 0.52,
+        "beta_to_usd": 0.82,
+        "fx_category": "HIGH_USD_SENSITIVE"
+      },
+      {
+        "stock": "GOOGL",
+        "sector": "Tech",
+        "usd_revenue_pct": 0.6,
+        "jpy_costs_pct": 0.02,
+        "net_usd_exposure": 0.58,
+        "beta_to_usd": 0.88,
+        "fx_category": "HIGH_USD_SENSITIVE"
+      },
+      {
+        "stock": "NVDA",
+        "sector": "Tech",
+        "usd_revenue_pct": 0.7,
+        "jpy_costs_pct": 0.08,
+        "net_usd_exposure": 0.62,
+        "beta_to_usd": 0.9,
+        "fx_category": "HIGH_USD_SENSITIVE"
+      },
+      {
+        "stock": "META",
+        "sector": "Tech",
+        "usd_revenue_pct": 0.65,
+        "jpy_costs_pct": 0.04,
+        "net_usd_exposure": 0.61,
+        "beta_to_usd": 0.84,
+        "fx_category": "HIGH_USD_SENSITIVE"
+      },
+      {
+        "stock": "AMZN",
+        "sector": "Cloud",
+        "usd_revenue_pct": 0.4,
+        "jpy_costs_pct": 0.1,
+        "net_usd_exposure": 0.30000000000000004,
+        "beta_to_usd": 0.75,
+        "fx_category": "MILD_USD_SENSITIVE"
+      },
+      {
+        "stock": "CRM",
+        "sector": "SaaS",
+        "usd_revenue_pct": 0.45,
+        "jpy_costs_pct": 0.06,
+        "net_usd_exposure": 0.39,
+        "beta_to_usd": 0.78,
+        "fx_category": "MEDIUM_USD_SENSITIVE"
+      },
+      {
+        "stock": "TSLA",
+        "sector": "Auto",
+        "usd_revenue_pct": 0.35,
+        "jpy_costs_pct": 0.15,
+        "net_usd_exposure": 0.19999999999999998,
+        "beta_to_usd": 0.7,
+        "fx_category": "NEUTRAL_OR_JPY_EXPOSED"
+      },
+      {
+        "stock": "NFLX",
+        "sector": "Media",
+        "usd_revenue_pct": 0.55,
+        "jpy_costs_pct": 0.05,
+        "net_usd_exposure": 0.5,
+        "beta_to_usd": 0.8,
+        "fx_category": "HIGH_USD_SENSITIVE"
+      },
+      {
+        "stock": "ADBE",
+        "sector": "Software",
+        "usd_revenue_pct": 0.5,
+        "jpy_costs_pct": 0.04,
+        "net_usd_exposure": 0.46,
+        "beta_to_usd": 0.83,
+        "fx_category": "MEDIUM_USD_SENSITIVE"
+      }
+    ],
+    "portfolio_weighted_usd_exposure": 0.4630000000000001,
+    "high_usd_exposure_count": 5,
+    "neutral_count": 1
+  },
+  "swap_strategy": {
+    "avg_usd_exposure": 0.463,
+    "optimal_swap_ratio": 0.25,
+    "interpretation": "25% of USD position should be swapped to JPY-fixed"
+  },
+  "fx_impacts": {
+    "2019-2020 (Yen weakens 5%)": [
+      {
+        "stock": "AAPL",
+        "year": "2019-2020 (Yen weakens 5%)",
+        "fx_change_pct": 5.0,
+        "fx_impact_on_return": 1.8,
+        "net_exposure": 0.45
+      },
+      {
+        "stock": "MSFT",
+        "year": "2019-2020 (Yen weakens 5%)",
+        "fx_change_pct": 5.0,
+        "fx_impact_on_return": 2.08,
+        "net_exposure": 0.52
+      },
+      {
+        "stock": "GOOGL",
+        "year": "2019-2020 (Yen weakens 5%)",
+        "fx_change_pct": 5.0,
+        "fx_impact_on_return": 2.32,
+        "net_exposure": 0.58
+      },
+      {
+        "stock": "NVDA",
+        "year": "2019-2020 (Yen weakens 5%)",
+        "fx_change_pct": 5.0,
+        "fx_impact_on_return": 2.4800000000000004,
+        "net_exposure": 0.62
+      },
+      {
+        "stock": "META",
+        "year": "2019-2020 (Yen weakens 5%)",
+        "fx_change_pct": 5.0,
+        "fx_impact_on_return": 2.44,
+        "net_exposure": 0.61
+      },
+      {
+        "stock": "AMZN",
+        "year": "2019-2020 (Yen weakens 5%)",
+        "fx_change_pct": 5.0,
+        "fx_impact_on_return": 1.2000000000000002,
+        "net_exposure": 0.30000000000000004
+      },
+      {
+        "stock": "CRM",
+        "year": "2019-2020 (Yen weakens 5%)",
+        "fx_change_pct": 5.0,
+        "fx_impact_on_return": 1.5600000000000003,
+        "net_exposure": 0.39
+      },
+      {
+        "stock": "TSLA",
+        "year": "2019-2020 (Yen weakens 5%)",
+        "fx_change_pct": 5.0,
+        "fx_impact_on_return": 0.7999999999999999,
+        "net_exposure": 0.19999999999999998
+      },
+      {
+        "stock": "NFLX",
+        "year": "2019-2020 (Yen weakens 5%)",
+        "fx_change_pct": 5.0,
+        "fx_impact_on_return": 2.0,
+        "net_exposure": 0.5
+      },
+      {
+        "stock": "ADBE",
+        "year": "2019-2020 (Yen weakens 5%)",
+        "fx_change_pct": 5.0,
+        "fx_impact_on_return": 1.8400000000000003,
+        "net_exposure": 0.46
+      }
+    ],
+    "2020-2021 (Yen weakens 3%)": [
+      {
+        "stock": "AAPL",
+        "year": "2020-2021 (Yen weakens 3%)",
+        "fx_change_pct": 3.0,
+        "fx_impact_on_return": 1.08,
+        "net_exposure": 0.45
+      },
+      {
+        "stock": "MSFT",
+        "year": "2020-2021 (Yen weakens 3%)",
+        "fx_change_pct": 3.0,
+        "fx_impact_on_return": 1.2480000000000002,
+        "net_exposure": 0.52
+      },
+      {
+        "stock": "GOOGL",
+        "year": "2020-2021 (Yen weakens 3%)",
+        "fx_change_pct": 3.0,
+        "fx_impact_on_return": 1.392,
+        "net_exposure": 0.58
+      },
+      {
+        "stock": "NVDA",
+        "year": "2020-2021 (Yen weakens 3%)",
+        "fx_change_pct": 3.0,
+        "fx_impact_on_return": 1.488,
+        "net_exposure": 0.62
+      },
+      {
+        "stock": "META",
+        "year": "2020-2021 (Yen weakens 3%)",
+        "fx_change_pct": 3.0,
+        "fx_impact_on_return": 1.4640000000000002,
+        "net_exposure": 0.61
+      },
+      {
+        "stock": "AMZN",
+        "year": "2020-2021 (Yen weakens 3%)",
+        "fx_change_pct": 3.0,
+        "fx_impact_on_return": 0.7200000000000002,
+        "net_exposure": 0.30000000000000004
+      },
+      {
+        "stock": "CRM",
+        "year": "2020-2021 (Yen weakens 3%)",
+        "fx_change_pct": 3.0,
+        "fx_impact_on_return": 0.9359999999999999,
+        "net_exposure": 0.39
+      },
+      {
+        "stock": "TSLA",
+        "year": "2020-2021 (Yen weakens 3%)",
+        "fx_change_pct": 3.0,
+        "fx_impact_on_return": 0.48,
+        "net_exposure": 0.19999999999999998
+      },
+      {
+        "stock": "NFLX",
+        "year": "2020-2021 (Yen weakens 3%)",
+        "fx_change_pct": 3.0,
+        "fx_impact_on_return": 1.2000000000000002,
+        "net_exposure": 0.5
+      },
+      {
+        "stock": "ADBE",
+        "year": "2020-2021 (Yen weakens 3%)",
+        "fx_change_pct": 3.0,
+        "fx_impact_on_return": 1.104,
+        "net_exposure": 0.46
+      }
+    ],
+    "2021-2022 (Yen strengthens 2%)": [
+      {
+        "stock": "AAPL",
+        "year": "2021-2022 (Yen strengthens 2%)",
+        "fx_change_pct": -2.0,
+        "fx_impact_on_return": -0.7200000000000001,
+        "net_exposure": 0.45
+      },
+      {
+        "stock": "MSFT",
+        "year": "2021-2022 (Yen strengthens 2%)",
+        "fx_change_pct": -2.0,
+        "fx_impact_on_return": -0.8320000000000001,
+        "net_exposure": 0.52
+      },
+      {
+        "stock": "GOOGL",
+        "year": "2021-2022 (Yen strengthens 2%)",
+        "fx_change_pct": -2.0,
+        "fx_impact_on_return": -0.9279999999999999,
+        "net_exposure": 0.58
+      },
+      {
+        "stock": "NVDA",
+        "year": "2021-2022 (Yen strengthens 2%)",
+        "fx_change_pct": -2.0,
+        "fx_impact_on_return": -0.992,
+        "net_exposure": 0.62
+      },
+      {
+        "stock": "META",
+        "year": "2021-2022 (Yen strengthens 2%)",
+        "fx_change_pct": -2.0,
+        "fx_impact_on_return": -0.976,
+        "net_exposure": 0.61
+      },
+      {
+        "stock": "AMZN",
+        "year": "2021-2022 (Yen strengthens 2%)",
+        "fx_change_pct": -2.0,
+        "fx_impact_on_return": -0.4800000000000001,
+        "net_exposure": 0.30000000000000004
+      },
+      {
+        "stock": "CRM",
+        "year": "2021-2022 (Yen strengthens 2%)",
+        "fx_change_pct": -2.0,
+        "fx_impact_on_return": -0.6240000000000001,
+        "net_exposure": 0.39
+      },
+      {
+        "stock": "TSLA",
+        "year": "2021-2022 (Yen strengthens 2%)",
+        "fx_change_pct": -2.0,
+        "fx_impact_on_return": -0.32,
+        "net_exposure": 0.19999999999999998
+      },
+      {
+        "stock": "NFLX",
+        "year": "2021-2022 (Yen strengthens 2%)",
+        "fx_change_pct": -2.0,
+        "fx_impact_on_return": -0.8,
+        "net_exposure": 0.5
+      },
+      {
+        "stock": "ADBE",
+        "year": "2021-2022 (Yen strengthens 2%)",
+        "fx_change_pct": -2.0,
+        "fx_impact_on_return": -0.7360000000000001,
+        "net_exposure": 0.46
+      }
+    ],
+    "2022-2023 (Yen weakens 8%)": [
+      {
+        "stock": "AAPL",
+        "year": "2022-2023 (Yen weakens 8%)",
+        "fx_change_pct": 8.0,
+        "fx_impact_on_return": 2.8800000000000003,
+        "net_exposure": 0.45
+      },
+      {
+        "stock": "MSFT",
+        "year": "2022-2023 (Yen weakens 8%)",
+        "fx_change_pct": 8.0,
+        "fx_impact_on_return": 3.3280000000000003,
+        "net_exposure": 0.52
+      },
+      {
+        "stock": "GOOGL",
+        "year": "2022-2023 (Yen weakens 8%)",
+        "fx_change_pct": 8.0,
+        "fx_impact_on_return": 3.7119999999999997,
+        "net_exposure": 0.58
+      },
+      {
+        "stock": "NVDA",
+        "year": "2022-2023 (Yen weakens 8%)",
+        "fx_change_pct": 8.0,
+        "fx_impact_on_return": 3.968,
+        "net_exposure": 0.62
+      },
+      {
+        "stock": "META",
+        "year": "2022-2023 (Yen weakens 8%)",
+        "fx_change_pct": 8.0,
+        "fx_impact_on_return": 3.904,
+        "net_exposure": 0.61
+      },
+      {
+        "stock": "AMZN",
+        "year": "2022-2023 (Yen weakens 8%)",
+        "fx_change_pct": 8.0,
+        "fx_impact_on_return": 1.9200000000000004,
+        "net_exposure": 0.30000000000000004
+      },
+      {
+        "stock": "CRM",
+        "year": "2022-2023 (Yen weakens 8%)",
+        "fx_change_pct": 8.0,
+        "fx_impact_on_return": 2.4960000000000004,
+        "net_exposure": 0.39
+      },
+      {
+        "stock": "TSLA",
+        "year": "2022-2023 (Yen weakens 8%)",
+        "fx_change_pct": 8.0,
+        "fx_impact_on_return": 1.28,
+        "net_exposure": 0.19999999999999998
+      },
+      {
+        "stock": "NFLX",
+        "year": "2022-2023 (Yen weakens 8%)",
+        "fx_change_pct": 8.0,
+        "fx_impact_on_return": 3.2,
+        "net_exposure": 0.5
+      },
+      {
+        "stock": "ADBE",
+        "year": "2022-2023 (Yen weakens 8%)",
+        "fx_change_pct": 8.0,
+        "fx_impact_on_return": 2.9440000000000004,
+        "net_exposure": 0.46
+      }
+    ],
+    "2023-2024 (Yen strengthens 1%)": [
+      {
+        "stock": "AAPL",
+        "year": "2023-2024 (Yen strengthens 1%)",
+        "fx_change_pct": -1.0,
+        "fx_impact_on_return": -0.36000000000000004,
+        "net_exposure": 0.45
+      },
+      {
+        "stock": "MSFT",
+        "year": "2023-2024 (Yen strengthens 1%)",
+        "fx_change_pct": -1.0,
+        "fx_impact_on_return": -0.41600000000000004,
+        "net_exposure": 0.52
+      },
+      {
+        "stock": "GOOGL",
+        "year": "2023-2024 (Yen strengthens 1%)",
+        "fx_change_pct": -1.0,
+        "fx_impact_on_return": -0.46399999999999997,
+        "net_exposure": 0.58
+      },
+      {
+        "stock": "NVDA",
+        "year": "2023-2024 (Yen strengthens 1%)",
+        "fx_change_pct": -1.0,
+        "fx_impact_on_return": -0.496,
+        "net_exposure": 0.62
+      },
+      {
+        "stock": "META",
+        "year": "2023-2024 (Yen strengthens 1%)",
+        "fx_change_pct": -1.0,
+        "fx_impact_on_return": -0.488,
+        "net_exposure": 0.61
+      },
+      {
+        "stock": "AMZN",
+        "year": "2023-2024 (Yen strengthens 1%)",
+        "fx_change_pct": -1.0,
+        "fx_impact_on_return": -0.24000000000000005,
+        "net_exposure": 0.30000000000000004
+      },
+      {
+        "stock": "CRM",
+        "year": "2023-2024 (Yen strengthens 1%)",
+        "fx_change_pct": -1.0,
+        "fx_impact_on_return": -0.31200000000000006,
+        "net_exposure": 0.39
+      },
+      {
+        "stock": "TSLA",
+        "year": "2023-2024 (Yen strengthens 1%)",
+        "fx_change_pct": -1.0,
+        "fx_impact_on_return": -0.16,
+        "net_exposure": 0.19999999999999998
+      },
+      {
+        "stock": "NFLX",
+        "year": "2023-2024 (Yen strengthens 1%)",
+        "fx_change_pct": -1.0,
+        "fx_impact_on_return": -0.4,
+        "net_exposure": 0.5
+      },
+      {
+        "stock": "ADBE",
+        "year": "2023-2024 (Yen strengthens 1%)",
+        "fx_change_pct": -1.0,
+        "fx_impact_on_return": -0.36800000000000005,
+        "net_exposure": 0.46
+      }
+    ]
+  },
+  "scenarios": {
+    "unhedged": {
+      "5yr": 452.3209345893411,
+      "cagr": 40.74672589532875
+    },
+    "hedged_25": {
+      "5yr": 444.08436937133376,
+      "cagr": 40.324418084595656
+    },
+    "hedged_100": {
+      "5yr": 420.4577871806792,
+      "cagr": 39.083977536334345
+    }
+  }
+}
