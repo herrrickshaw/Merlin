@@ -1,0 +1,75 @@
+{
+  "timestamp": "2026-07-03T17:09:38.850790",
+  "current_yen_usd_rate": 161.29,
+  "capital_jpy": 100000000,
+  "capital_usd": 620001.24000248,
+  "recommendations": {
+    "tier1_unhedged": {
+      "NVDA": {
+        "allocation_usd": 93083.40000000001,
+        "pct": 0.2
+      },
+      "META": {
+        "allocation_usd": 83775.06,
+        "pct": 0.18
+      },
+      "MSFT": {
+        "allocation_usd": 79120.89,
+        "pct": 0.17
+      },
+      "GOOGL": {
+        "allocation_usd": 69812.55,
+        "pct": 0.15
+      },
+      "ASML": {
+        "allocation_usd": 60504.21,
+        "pct": 0.13
+      },
+      "AMZN": {
+        "allocation_usd": 46541.700000000004,
+        "pct": 0.1
+      },
+      "NFLX": {
+        "allocation_usd": 32579.190000000002,
+        "pct": 0.07
+      }
+    },
+    "tier2_swapped": {
+      "TSM": {
+        "allocation_usd": 62055.600000000006,
+        "pct": 0.4
+      },
+      "AAPL": {
+        "allocation_usd": 46541.7,
+        "pct": 0.3
+      },
+      "CRM": {
+        "allocation_usd": 46541.7,
+        "pct": 0.3
+      }
+    }
+  },
+  "rate_scenarios": {
+    "conservative": {
+      "2025": 158.0,
+      "2026": 154.0,
+      "2027": 148.0,
+      "2028": 143.0,
+      "2029": 140.0
+    },
+    "base_case": {
+      "2025": 162.0,
+      "2026": 160.0,
+      "2027": 157.0,
+      "2028": 154.0,
+      "2029": 152.0
+    },
+    "bullish": {
+      "2025": 165.0,
+      "2026": 168.0,
+      "2027": 172.0,
+      "2028": 175.0,
+      "2029": 178.0
+    }
+  }
+}
