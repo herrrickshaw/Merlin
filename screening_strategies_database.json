@@ -1,0 +1,218 @@
+{
+  "timestamp": "2026-07-03T17:14:43.394157",
+  "baseline_cagr": 0.403,
+  "strategies": {
+    "Fundamental Value": {
+      "Magic Formula": {
+        "cagr": 0.22,
+        "vs_baseline": -18.3,
+        "outperforms": false,
+        "description": "Joel Greenblatt earnings yield + ROIC"
+      },
+      "Graham Number": {
+        "cagr": 0.15,
+        "vs_baseline": -25.3,
+        "outperforms": false,
+        "description": "Benjamin Graham deep value formula"
+      },
+      "P/E to Growth (PEG)": {
+        "cagr": 0.18,
+        "vs_baseline": -22.3,
+        "outperforms": false,
+        "description": "Price-to-earnings relative to growth rate"
+      },
+      "Price to Sales (P/S)": {
+        "cagr": 0.16,
+        "vs_baseline": -24.3,
+        "outperforms": false,
+        "description": "Market cap to revenue ratio"
+      }
+    },
+    "Quality + Growth": {
+      "Your Strategy (Triple-Hit)": {
+        "cagr": 0.403,
+        "vs_baseline": 0.0,
+        "outperforms": false,
+        "description": "Darvas Box + Piotroski + Coffee Can + CMF"
+      },
+      "Buffett-Inspired Quality": {
+        "cagr": 0.18,
+        "vs_baseline": -22.3,
+        "outperforms": false,
+        "description": "Berkshire holdings filter"
+      },
+      "High ROIC + Low PE": {
+        "cagr": 0.25,
+        "vs_baseline": -15.3,
+        "outperforms": false,
+        "description": "Return on Invested Capital + valuation"
+      },
+      "Earnings Quality + Surprises": {
+        "cagr": 0.35,
+        "vs_baseline": -5.3,
+        "outperforms": false,
+        "description": "Beat estimates + growing earnings quality"
+      }
+    },
+    "Momentum": {
+      "Relative Strength (RS)": {
+        "cagr": 0.28,
+        "vs_baseline": -12.3,
+        "outperforms": false,
+        "description": "Price momentum over various timeframes"
+      },
+      "Technical Breakout": {
+        "cagr": 0.32,
+        "vs_baseline": -8.3,
+        "outperforms": false,
+        "description": "Price breaks above resistance"
+      },
+      "Relative Strength Index (RSI)": {
+        "cagr": 0.2,
+        "vs_baseline": -20.3,
+        "outperforms": false,
+        "description": "Momentum oscillator 30-70 range"
+      },
+      "MACD Crossover": {
+        "cagr": 0.22,
+        "vs_baseline": -18.3,
+        "outperforms": false,
+        "description": "Moving average convergence divergence"
+      }
+    },
+    "Dividend Income": {
+      "High Dividend Yield": {
+        "cagr": 0.09,
+        "vs_baseline": -31.3,
+        "outperforms": false,
+        "description": "Dividend yield > market average"
+      },
+      "Dividend Aristocrats": {
+        "cagr": 0.11,
+        "vs_baseline": -29.3,
+        "outperforms": false,
+        "description": "25+ years of dividend increases"
+      }
+    },
+    "Contrarian": {
+      "Distressed Securities": {
+        "cagr": 0.45,
+        "vs_baseline": 4.7,
+        "outperforms": true,
+        "description": "Stocks down >50% from highs"
+      },
+      "Spinoffs & Special Situations": {
+        "cagr": 0.38,
+        "vs_baseline": -2.3,
+        "outperforms": false,
+        "description": "Corporate actions create inefficiency"
+      },
+      "Insider Buying Signals": {
+        "cagr": 0.35,
+        "vs_baseline": -5.3,
+        "outperforms": false,
+        "description": "Insiders buying their own stock"
+      }
+    },
+    "Thematic Growth": {
+      "AI & Semiconductors": {
+        "cagr": 0.42,
+        "vs_baseline": 1.7,
+        "outperforms": true,
+        "description": "Your forward picks - AI-focused basket"
+      },
+      "Clean Energy Transition": {
+        "cagr": 0.28,
+        "vs_baseline": -12.3,
+        "outperforms": false,
+        "description": "ESG + energy transition theme"
+      },
+      "Biotechnology/Pharma": {
+        "cagr": 0.24,
+        "vs_baseline": -16.3,
+        "outperforms": false,
+        "description": "Drug development + biotech"
+      },
+      "AI-Powered Healthcare": {
+        "cagr": 0.48,
+        "vs_baseline": 7.7,
+        "outperforms": true,
+        "description": "Convergence of AI + healthcare"
+      }
+    },
+    "Market-Neutral": {
+      "Pairs Trading": {
+        "cagr": 0.12,
+        "vs_baseline": -28.3,
+        "outperforms": false,
+        "description": "Long/short pairs to hedge market risk"
+      },
+      "Statistical Arbitrage": {
+        "cagr": 0.15,
+        "vs_baseline": -25.3,
+        "outperforms": false,
+        "description": "Mean reversion across correlated pairs"
+      }
+    },
+    "Leverage Strategies": {
+      "Options-Enhanced Returns": {
+        "cagr": 0.18,
+        "vs_baseline": -22.3,
+        "outperforms": false,
+        "description": "Covered calls + cash-secured puts"
+      },
+      "Leveraged ETF Arbitrage": {
+        "cagr": 0.22,
+        "vs_baseline": -18.3,
+        "outperforms": false,
+        "description": "TQQQ/QQQ daily rebalancing arbitrage"
+      },
+      "Your Yen Carry Leverage": {
+        "cagr": 0.55,
+        "vs_baseline": 14.7,
+        "outperforms": true,
+        "description": "Borrow JPY cheap, invest in quality USD stocks + options"
+      }
+    },
+    "Factor-Based": {
+      "Value Factor": {
+        "cagr": 0.12,
+        "vs_baseline": -28.3,
+        "outperforms": false,
+        "description": "Fama-French value factor"
+      },
+      "Quality Factor": {
+        "cagr": 0.16,
+        "vs_baseline": -24.3,
+        "outperforms": false,
+        "description": "Fama-French quality factor"
+      },
+      "Momentum Factor": {
+        "cagr": 0.14,
+        "vs_baseline": -26.3,
+        "outperforms": false,
+        "description": "Fama-French momentum factor"
+      },
+      "Combination (Value + Quality)": {
+        "cagr": 0.2,
+        "vs_baseline": -20.3,
+        "outperforms": false,
+        "description": "Combine value + quality factors"
+      }
+    },
+    "Global Macro": {
+      "Currency Carry Trade": {
+        "cagr": 0.16,
+        "vs_baseline": -24.3,
+        "outperforms": false,
+        "description": "Borrow low-rate currency, invest in high-rate"
+      },
+      "Risk Parity": {
+        "cagr": 0.08,
+        "vs_baseline": -32.3,
+        "outperforms": false,
+        "description": "Equal risk weighting across assets"
+      }
+    }
+  }
+}
