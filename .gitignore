@@ -1,0 +1,10 @@
+_build/
+*.swp
+*.swo
+*~
+.merlin
+.env
+*.log
+dist/
+build/
+node_modules/

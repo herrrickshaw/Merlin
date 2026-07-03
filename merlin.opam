@@ -1,0 +1,14 @@
+opam-version: "2.0"
+name: "merlin"
+version: "0.1.0"
+synopsis: "LFS Data Analyzer and Git Uploader"
+description: "Compact OCaml tool for analyzing large file storage data and uploading to git repositories"
+maintainer: "herrrickshaw"
+authors: ["herrrickshaw"]
+depends: [
+  "ocaml" {>= "4.14"}
+  "dune" {>= "3.0"}
+  "yojson"
+  "ppx_deriving_yojson"
+  "unix"
+]

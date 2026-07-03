@@ -1,0 +1,5 @@
+(executable
+ (name merlin)
+ (public_name merlin)
+ (libraries merlin_lib str)
+ (preprocess (pps ppx_deriving_yojson)))
