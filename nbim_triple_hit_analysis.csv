@@ -1,0 +1,20 @@
+ticker,name,sector,usd_exposure,piotroski,darvas,piotroski_pass,coffee_can,cmf,triple_hit,stages_passed,returns_2020,returns_2021,returns_2022,returns_2023,returns_2024
+AAPL,Apple,Tech,0.5,9,True,True,True,True,True,4,0.81,0.26,-0.26,0.48,0.28
+MSFT,Microsoft,Tech,0.55,8,True,True,True,True,True,4,0.41,0.27,-0.28,0.55,0.3
+GOOGL,Alphabet,Tech,0.6,9,True,True,True,True,True,4,0.31,0.42,-0.4,0.58,0.32
+NVDA,NVIDIA,Tech,0.7,8,True,True,True,True,True,4,0.74,1.26,0.52,0.98,0.15
+TSLA,Tesla,Auto,0.35,6,True,False,False,True,False,2,7.41,0.49,-0.65,-0.65,-0.06
+META,Meta,Tech,0.65,7,True,True,True,True,True,4,0.33,0.23,-0.64,1.98,0.52
+AMZN,Amazon,Cloud,0.4,7,True,True,True,True,True,4,0.76,0.76,-0.5,0.81,0.14
+CRM,Salesforce,SaaS,0.45,8,True,True,True,True,True,4,0.5,0.26,-0.59,0.28,0.28
+ADBE,Adobe,Software,0.5,8,True,True,True,True,True,4,0.39,0.32,-0.4,0.35,0.2
+NFLX,Netflix,Media,0.55,7,True,True,True,True,True,4,0.67,0.17,-0.51,0.81,0.35
+JNJ,Johnson & Johnson,Healthcare,0.45,8,False,True,True,True,False,3,0.06,0.16,0.06,-0.05,0.08
+UNH,UnitedHealth,Healthcare,0.4,7,False,True,True,True,False,3,,,,,
+PFE,Pfizer,Pharma,0.5,6,False,False,False,True,False,1,,,,,
+BRK.B,Berkshire,Finance,0.35,7,False,True,True,True,False,3,,,,,
+JPM,JPMorgan,Finance,0.3,7,False,True,True,True,False,3,,,,,
+XOM,Exxon Mobil,Energy,0.6,6,True,False,False,True,False,2,-0.33,0.55,0.65,0.08,0.18
+CVX,Chevron,Energy,0.65,5,False,False,False,True,False,1,,,,,
+KO,Coca-Cola,Consumer,0.55,6,False,False,False,True,False,1,,,,,
+MCD,McDonald's,Consumer,0.5,6,False,False,False,True,False,1,,,,,
