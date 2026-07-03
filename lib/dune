@@ -1,5 +1,5 @@
 (library
  (name merlin_lib)
  (libraries str yojson unix sqlite3 containers zarith)
- (modules data analyze uploader screener advanced_analysis persistence)
+ (modules data analyze uploader screener advanced_analysis persistence integrations)
  (preprocess (pps ppx_deriving ppx_sexp_conv)))

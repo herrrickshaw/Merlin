@@ -1,5 +1,5 @@
 (executables
- (names merlin screener advanced_analyzer)
- (public_names merlin screener advanced_analyzer)
+ (names merlin screener advanced_analyzer multi_market)
+ (public_names merlin screener advanced_analyzer multi_market)
  (libraries merlin_lib str yojson)
  (preprocess (pps ppx_deriving_yojson)))
