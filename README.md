@@ -1,5 +1,7 @@
 # Merlin: LFS Data Analyzer & Uploader
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/herrrickshaw/Merlin/blob/master/notebooks/colab_test.ipynb)
+
 A compact OCaml tool for analyzing Large File Storage (LFS) data and uploading results to Git repositories.
 
 ## Features
