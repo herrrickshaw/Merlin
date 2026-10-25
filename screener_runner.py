@@ -333,6 +333,10 @@ def main():
     print(f"   ✓ Generated {len(results)} results")
 
     strategies_found = set(r.strategy for r in results if r.passed)
+    if strategy:
+        if strategy not in strategies_found:
+            print(f"   ✗ No stock passed strategy '{strategy}' (available: {', '.join(sorted(strategies_found)) or 'none'})")
+        strategies_found &= {strategy}
     print(f"   ✓ Strategies: {', '.join(sorted(strategies_found))}")
 
     for strat in sorted(strategies_found):
