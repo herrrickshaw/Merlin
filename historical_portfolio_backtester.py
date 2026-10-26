@@ -249,7 +249,7 @@ class HistoricalBacktester:
         summary += f"RISK METRICS:\n"
         summary += f"Volatility: {metrics['volatility_pct']:.2f}%\n"
         summary += f"Max Drawdown: {metrics['max_drawdown_pct']:.2f}%\n"
-        summary += f"Sharpe Ratio: {sharpe:.2f}\n"
+        summary += f"Sharpe Ratio: {metrics['sharpe_ratio']:.2f}\n"
 
         return summary
 
