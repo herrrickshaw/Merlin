@@ -1,0 +1,126 @@
+
+📊 Stock Screener — OCaml-style analysis in Python
+   Loading: examples/screener_test_data.csv
+   ✓ Loaded 10 stocks
+
+🔍 Running screening...
+   ✓ Generated 50 results
+   ✓ Strategies: magic_formula, piotroski
+
+======================================================================
+🏆 Top 8 MAGIC_FORMULA Results
+======================================================================
+ 1. TCS          | Score: 10.20    | cheap_quality
+    └─ ROE               : 22.1
+    └─ Earnings_Yield    : 10.20%
+    └─ ROE>15            : 1
+    └─ EY>0              : 1
+ 2. HDFC         | Score: 9.80     | cheap_quality
+    └─ ROE               : 19.2
+    └─ Earnings_Yield    : 9.80%
+    └─ ROE>15            : 1
+    └─ EY>0              : 1
+ 3. AXISBANK     | Score: 9.10     | cheap_quality
+    └─ ROE               : 17.5
+    └─ Earnings_Yield    : 9.10%
+    └─ ROE>15            : 1
+    └─ EY>0              : 1
+ 4. MARUTI       | Score: 8.90     | cheap_quality
+    └─ ROE               : 18.9
+    └─ Earnings_Yield    : 8.90%
+    └─ ROE>15            : 1
+    └─ EY>0              : 1
+ 5. ICICIBANK    | Score: 8.80     | cheap_quality
+    └─ ROE               : 17.2
+    └─ Earnings_Yield    : 8.80%
+    └─ ROE>15            : 1
+    └─ EY>0              : 1
+ 6. RELIANCE     | Score: 8.50     | cheap_quality
+    └─ ROE               : 18.5
+    └─ Earnings_Yield    : 8.50%
+    └─ ROE>15            : 1
+    └─ EY>0              : 1
+ 7. INFY         | Score: 7.80     | cheap_quality
+    └─ ROE               : 16.8
+    └─ Earnings_Yield    : 7.80%
+    └─ ROE>15            : 1
+    └─ EY>0              : 1
+ 8. BAJAJFINSV   | Score: 7.50     | cheap_quality
+    └─ ROE               : 16.8
+    └─ Earnings_Yield    : 7.50%
+    └─ ROE>15            : 1
+    └─ EY>0              : 1
+
+======================================================================
+🏆 Top 10 PIOTROSKI Results
+======================================================================
+ 1. RELIANCE     | Score: 8.00     | strong
+    └─ ROA>0             : 1
+    └─ CFO>0             : 1
+    └─ dROA>0            : 1
+    └─ Accrual           : 0
+ 2. INFY         | Score: 8.00     | strong
+    └─ ROA>0             : 1
+    └─ CFO>0             : 1
+    └─ dROA>0            : 1
+    └─ Accrual           : 0
+ 3. WIPRO        | Score: 8.00     | strong
+    └─ ROA>0             : 1
+    └─ CFO>0             : 1
+    └─ dROA>0            : 1
+    └─ Accrual           : 0
+ 4. AXISBANK     | Score: 8.00     | strong
+    └─ ROA>0             : 1
+    └─ CFO>0             : 1
+    └─ dROA>0            : 1
+    └─ Accrual           : 0
+ 5. HDFC         | Score: 8.00     | strong
+    └─ ROA>0             : 1
+    └─ CFO>0             : 1
+    └─ dROA>0            : 1
+    └─ Accrual           : 0
+ 6. MARUTI       | Score: 8.00     | strong
+    └─ ROA>0             : 1
+    └─ CFO>0             : 1
+    └─ dROA>0            : 1
+    └─ Accrual           : 0
+ 7. BAJAJFINSV   | Score: 8.00     | strong
+    └─ ROA>0             : 1
+    └─ CFO>0             : 1
+    └─ dROA>0            : 1
+    └─ Accrual           : 0
+ 8. BHARTIARTL   | Score: 8.00     | strong
+    └─ ROA>0             : 1
+    └─ CFO>0             : 1
+    └─ dROA>0            : 1
+    └─ Accrual           : 0
+ 9. ICICIBANK    | Score: 8.00     | strong
+    └─ ROA>0             : 1
+    └─ CFO>0             : 1
+    └─ dROA>0            : 1
+    └─ Accrual           : 0
+10. TCS          | Score: 7.00     | strong
+    └─ ROA>0             : 1
+    └─ CFO>0             : 1
+    └─ dROA>0            : 1
+    └─ Accrual           : 0
+
+======================================================================
+📈 Summary Statistics
+======================================================================
+magic_formula       :   8 passes | avg score:   8.82
+piotroski           :  10 passes | avg score:   7.90
+
+======================================================================
+⚡ Multi-Pass Effectiveness (stocks passing multiple strategies)
+======================================================================
+RELIANCE    : 2 strategies | piotroski, magic_formula
+TCS         : 2 strategies | piotroski, magic_formula
+INFY        : 2 strategies | piotroski, magic_formula
+AXISBANK    : 2 strategies | piotroski, magic_formula
+HDFC        : 2 strategies | piotroski, magic_formula
+MARUTI      : 2 strategies | piotroski, magic_formula
+BAJAJFINSV  : 2 strategies | piotroski, magic_formula
+ICICIBANK   : 2 strategies | piotroski, magic_formula
+WIPRO       : 1 strategies | piotroski
+BHARTIARTL  : 1 strategies | piotroski
