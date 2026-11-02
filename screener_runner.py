@@ -4,11 +4,28 @@ Stock Screener Runner - OCaml-style strategies in Python
 Demonstrates the OCaml screener logic by running it on test data
 """
 
+from __future__ import annotations
+
 import csv
 import sys
 from collections import defaultdict
-from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, field
+from typing import Callable, Dict, List, Optional
+
+# ─── Configuration ──────────────────────────────────────────────────────────
+
+TRADING_DAYS_52W = 252
+PIOTROSKI_STRONG = 7
+DEFAULT_TOP_N = 10
+
+# Fundamental columns read from the input CSV (blank/non-numeric cells are skipped)
+FUNDAMENTAL_KEYS = (
+    'roe', 'net_income', 'roa', 'roa_prev', 'cfo', 'debt_to_assets',
+    'debt_to_assets_prev', 'current_ratio', 'current_ratio_prev', 'shares',
+    'shares_prev', 'gross_margin', 'gross_margin_prev', 'asset_turnover',
+    'asset_turnover_prev', 'revenue', 'revenue_5y_ago', 'debt_to_equity',
+    'earnings_yield',
+)
 
 @dataclass
 class OHLCV:
@@ -57,7 +74,7 @@ def high_52w(stock: StockData) -> Optional[float]:
     """52-week high"""
     if not stock.ohlcv:
         return None
-    last_252 = stock.ohlcv[-252:] if len(stock.ohlcv) >= 252 else stock.ohlcv
+    last_252 = stock.ohlcv[-TRADING_DAYS_52W:]
     highs = [bar.high for bar in last_252]
     return max(highs) if highs else None
 
@@ -147,7 +164,7 @@ def piotroski_screen(stock: StockData) -> Result:
     add("dGM>0", gm is not None and gm_prev is not None and gm > gm_prev)
     add("dAT>0", at is not None and at_prev is not None and at > at_prev)
 
-    passed = pts >= 7
+    passed = pts >= PIOTROSKI_STRONG
 
     return Result(
         stock.symbol,
@@ -246,15 +263,18 @@ def golden_crossover_screen(stock: StockData) -> Result:
         note="bullish" if passed else "bearish",
     )
 
+# Strategy registry: add a new screen by appending a function here (open/closed).
+STRATEGIES: Dict[str, Callable[[StockData], Result]] = {
+    "darvas": darvas_screen,
+    "piotroski": piotroski_screen,
+    "coffee_can": coffee_can_screen,
+    "magic_formula": magic_formula_screen,
+    "golden_crossover": golden_crossover_screen,
+}
+
 def screen_stock(stock: StockData) -> List[Result]:
     """Run all strategies on a stock"""
-    return [
-        darvas_screen(stock),
-        piotroski_screen(stock),
-        coffee_can_screen(stock),
-        magic_formula_screen(stock),
-        golden_crossover_screen(stock),
-    ]
+    return [screen(stock) for screen in STRATEGIES.values()]
 
 def screen_market(stocks: List[StockData]) -> List[Result]:
     """Screen entire market"""
@@ -294,11 +314,7 @@ def load_csv_to_stocks(csv_file: str) -> List[StockData]:
             stocks_dict[symbol].ohlcv.append(bar)
 
             # Load fundamentals
-            for key in ['roe', 'net_income', 'roa', 'roa_prev', 'cfo', 'debt_to_assets',
-                       'debt_to_assets_prev', 'current_ratio', 'current_ratio_prev', 'shares',
-                       'shares_prev', 'gross_margin', 'gross_margin_prev', 'asset_turnover',
-                       'asset_turnover_prev', 'revenue', 'revenue_5y_ago', 'debt_to_equity',
-                       'earnings_yield']:
+            for key in FUNDAMENTAL_KEYS:
                 if key in row and row[key]:
                     try:
                         stocks_dict[symbol].fundamentals[key] = float(row[key])
@@ -307,35 +323,26 @@ def load_csv_to_stocks(csv_file: str) -> List[StockData]:
 
     return list(stocks_dict.values())
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: python screener_runner.py <csv_file> [--strategy NAME] [--top N]")
-        sys.exit(1)
+def parse_args(argv: List[str]):
+    """Parse ``<csv> [--strategy NAME] [--top N]``; returns (csv_file, strategy, top_n).
 
-    csv_file = sys.argv[1]
+    ``--strategy`` is accepted for compatibility but does not filter the report.
+    """
+    csv_file = argv[1]
     strategy = None
-    top_n = 10
+    top_n = DEFAULT_TOP_N
 
-    for i, arg in enumerate(sys.argv[2:]):
-        if arg == "--strategy" and i + 3 < len(sys.argv):
-            strategy = sys.argv[i + 3]
-        elif arg == "--top" and i + 3 < len(sys.argv):
-            top_n = int(sys.argv[i + 3])
+    for i, arg in enumerate(argv[2:]):
+        if arg == "--strategy" and i + 3 < len(argv):
+            strategy = argv[i + 3]
+        elif arg == "--top" and i + 3 < len(argv):
+            top_n = int(argv[i + 3])
+    return csv_file, strategy, top_n
 
-    print(f"\n📊 Stock Screener — OCaml-style analysis in Python")
-    print(f"   Loading: {csv_file}")
 
-    stocks = load_csv_to_stocks(csv_file)
-    print(f"   ✓ Loaded {len(stocks)} stocks")
-
-    print(f"\n🔍 Running screening...")
-    results = screen_market(stocks)
-    print(f"   ✓ Generated {len(results)} results")
-
-    strategies_found = set(r.strategy for r in results if r.passed)
-    print(f"   ✓ Strategies: {', '.join(sorted(strategies_found))}")
-
-    for strat in sorted(strategies_found):
+def print_top_results(results: List[Result], strategies: List[str], top_n: int) -> None:
+    """Print the top-N ranked passes for each strategy."""
+    for strat in strategies:
         ranked = rank_results(results, strat)
         if ranked:
             print(f"\n{'='*70}")
@@ -347,17 +354,21 @@ def main():
                 for k, v in list(r.metrics.items())[:4]:
                     print(f"    └─ {k:18s}: {v}")
 
-    # Summary statistics
+
+def print_summary(results: List[Result], strategies: List[str]) -> None:
+    """Print pass counts and average score per strategy."""
     print(f"\n{'='*70}")
     print("📈 Summary Statistics")
     print(f"{'='*70}")
-    for strat in sorted(strategies_found):
+    for strat in strategies:
         ranked = rank_results(results, strat)
         if ranked:
             avg_score = sum(r.score for r in ranked if r.score) / len([r for r in ranked if r.score])
             print(f"{strat:20s}: {len(ranked):3d} passes | avg score: {avg_score:6.2f}")
 
-    # Multi-pass analysis
+
+def print_multi_pass(results: List[Result]) -> None:
+    """Print stocks passing several strategies at once (top 10)."""
     print(f"\n{'='*70}")
     print("⚡ Multi-Pass Effectiveness (stocks passing multiple strategies)")
     print(f"{'='*70}")
@@ -370,6 +381,31 @@ def main():
     for symbol, count in multi_pass[:10]:
         strategies_passed = [r.strategy for r in results if r.symbol == symbol and r.passed]
         print(f"{symbol:12s}: {count} strategies | {', '.join(strategies_passed)}")
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python screener_runner.py <csv_file> [--strategy NAME] [--top N]")
+        sys.exit(1)
+
+    csv_file, _strategy, top_n = parse_args(sys.argv)
+
+    print("\n📊 Stock Screener — OCaml-style analysis in Python")
+    print(f"   Loading: {csv_file}")
+
+    stocks = load_csv_to_stocks(csv_file)
+    print(f"   ✓ Loaded {len(stocks)} stocks")
+
+    print("\n🔍 Running screening...")
+    results = screen_market(stocks)
+    print(f"   ✓ Generated {len(results)} results")
+
+    strategies_found = sorted(set(r.strategy for r in results if r.passed))
+    print(f"   ✓ Strategies: {', '.join(strategies_found)}")
+
+    print_top_results(results, strategies_found, top_n)
+    print_summary(results, strategies_found)
+    print_multi_pass(results)
 
 if __name__ == "__main__":
     main()
