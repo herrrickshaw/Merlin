@@ -4,11 +4,27 @@ Batch Market Screener
 Applies all 4-stage filters to entire market and identifies triple hits
 """
 
-import pandas as pd
-import numpy as np
+from __future__ import annotations
+
 from datetime import datetime, timedelta
-import json
+
+import numpy as np
+import pandas as pd
+
 from data_fetcher import MarketDataFetcher, validate_data
+
+# ─── Thresholds ────────────────────────────────────────────────────────────
+
+YEAR_DAYS = 252                 # trading days in a year (52-week window)
+SMA_LONG_DAYS = 200
+VOLUME_AVG_DAYS = 20
+NEAR_HIGH_PCT = 10.0            # Darvas: within 10% of the 52-week high
+VOLUME_MULT_MIN = 1.5           # Darvas: today's volume vs 20-day average
+PIOTROSKI_STRONG = 7            # Piotroski: points needed to pass
+CMF_PERIOD = 20
+CMF_ACCUMULATION = 0.05         # CMF above this = accumulation
+CMF_STRONG = 0.25
+LOOKBACK_DAYS_QUICK = YEAR_DAYS * 2   # history window used by main()
 
 # ─── Filter Implementations ────────────────────────────────────────────────
 
@@ -18,31 +34,31 @@ class StockFilters:
     @staticmethod
     def darvas_box(prices_df, volume_data):
         """Stage 1: Darvas Box Detection"""
-        if len(prices_df) < 252:
+        if len(prices_df) < YEAR_DAYS:
             return None
 
         close = prices_df['close'].values
         volume = volume_data['volume']
 
         # 52-week high
-        hi_52w = max(close[-252:])
+        hi_52w = max(close[-YEAR_DAYS:])
         current = close[-1]
 
         # Percentage off high
         pct_off = ((hi_52w - current) / hi_52w) * 100 if hi_52w > 0 else 100
 
         # Volume check
-        avg_vol_20d = np.mean(volume[-20:])
+        avg_vol_20d = np.mean(volume[-VOLUME_AVG_DAYS:])
         current_vol = volume[-1]
         vol_mult = current_vol / avg_vol_20d if avg_vol_20d > 0 else 0
 
         # 200-day MA
-        sma_200 = np.mean(close[-200:]) if len(close) >= 200 else np.mean(close)
+        sma_200 = np.mean(close[-SMA_LONG_DAYS:]) if len(close) >= SMA_LONG_DAYS else np.mean(close)
         above_200ma = current > sma_200
 
         # Signal
-        near_high = pct_off <= 10.0
-        vol_ok = vol_mult >= 1.5
+        near_high = pct_off <= NEAR_HIGH_PCT
+        vol_ok = vol_mult >= VOLUME_MULT_MIN
 
         passed = near_high and vol_ok and above_200ma
 
@@ -89,7 +105,7 @@ class StockFilters:
             score += 1
 
         return {
-            'passed': score >= 7,  # Need 7+ for strong
+            'passed': score >= PIOTROSKI_STRONG,  # Need 7+ for strong
             'score': score,
             'profitability': score >= 1,
             'leverage_ok': score >= 4,
@@ -140,7 +156,7 @@ class StockFilters:
         }
 
     @staticmethod
-    def chaikin_money_flow(volume_data, period=20):
+    def chaikin_money_flow(volume_data, period=CMF_PERIOD):
         """Stage 4: Chaikin Money Flow (Accumulation Detection)"""
         if not volume_data or len(volume_data['close']) < period:
             return None
@@ -169,10 +185,11 @@ class StockFilters:
         cmf = total_mf / total_vol
 
         return {
-            'passed': cmf > 0.05,  # Accumulation threshold
+            'passed': cmf > CMF_ACCUMULATION,  # Accumulation threshold
             'cmf_20': cmf,
-            'status': 'STRONG_ACCUMULATION' if cmf > 0.25 else ('ACCUMULATION' if cmf > 0.05 else 'NEUTRAL'),
-            'confidence': 0.95 if cmf > 0.25 else (0.75 if cmf > 0.05 else 0.5),
+            'status': ('STRONG_ACCUMULATION' if cmf > CMF_STRONG
+                       else 'ACCUMULATION' if cmf > CMF_ACCUMULATION else 'NEUTRAL'),
+            'confidence': 0.95 if cmf > CMF_STRONG else (0.75 if cmf > CMF_ACCUMULATION else 0.5),
         }
 
 # ─── Batch Screening Engine ────────────────────────────────────────────────
@@ -184,53 +201,56 @@ class BatchScreener:
         self.filters = StockFilters()
         self.results = []
 
-    def screen_stock(self, stock_data):
-        """Apply all 4 stages to a single stock"""
-        symbol = stock_data['symbol']
+    def _run_stages(self, stock_data):
+        """Run the four stages in order, stopping at the first failure.
 
-        # Validate data
-        valid, msg = validate_data(stock_data)
-        if not valid:
-            return None
+        Returns (stages_passed, details) where details maps stage name to its
+        result dict; ``stages_passed == 4`` means a triple hit.
+        """
+        if stock_data['prices'] is None:
+            return 0, {}
 
+        details = {}
+        steps = (
+            ('darvas', lambda: self.filters.darvas_box(stock_data['prices'], stock_data['volumes'])),
+            ('piotroski', lambda: self.filters.piotroski_score(stock_data['fundamentals'])),
+            ('coffee_can', lambda: self.filters.coffee_can_check(stock_data['fundamentals'])),
+            ('cmf', lambda: self.chaikin_money_flow(stock_data['volumes'])),
+        )
+        for name, run in steps:
+            outcome = run()
+            if not outcome or not outcome['passed']:
+                break
+            details[name] = outcome
+        return len(details), details
+
+    @staticmethod
+    def _build_result(stock_data, details):
+        """Assemble the triple-hit record from the four stage outputs."""
         prices_df = stock_data['prices']
-        volumes = stock_data['volumes']
         fundamentals = stock_data['fundamentals']
-
-        # Stage 1: Darvas Box
-        darvas = self.filters.darvas_box(prices_df, volumes)
-        if not darvas or not darvas['passed']:
-            return None
-
-        # Stage 2: Piotroski
-        piotroski = self.filters.piotroski_score(fundamentals)
-        if not piotroski or not piotroski['passed']:
-            return None
-
-        # Stage 3: Coffee Can
-        coffee_can = self.filters.coffee_can_check(fundamentals)
-        if not coffee_can or not coffee_can['passed']:
-            return None
-
-        # Stage 4: CMF Accumulation
-        cmf = self.chaikin_money_flow(volumes)
-        if not cmf or not cmf['passed']:
-            return None
-
-        # All stages passed - Triple Hit!
-        result = {
-            'symbol': symbol,
+        return {
+            'symbol': stock_data['symbol'],
             'price': prices_df['close'].iloc[-1],
             'date_identified': prices_df['date'].iloc[-1],
-            'darvas': darvas,
-            'piotroski': piotroski,
-            'coffee_can': coffee_can,
-            'cmf': cmf,
+            'darvas': details['darvas'],
+            'piotroski': details['piotroski'],
+            'coffee_can': details['coffee_can'],
+            'cmf': details['cmf'],
             'market_cap': fundamentals.get('market_cap', 0) if fundamentals else 0,
             'pe_ratio': fundamentals.get('pe_ratio', 0) if fundamentals else 0,
         }
 
-        return result
+    def screen_stock(self, stock_data):
+        """Apply all 4 stages to a single stock; the result dict, or None if any stage fails"""
+        valid, _msg = validate_data(stock_data)
+        if not valid:
+            return None
+
+        stages_passed, details = self._run_stages(stock_data)
+        if stages_passed < 4:
+            return None
+        return self._build_result(stock_data, details)
 
     def screen_market(self, market_data):
         """Screen all stocks in market"""
@@ -239,10 +259,7 @@ class BatchScreener:
 
         total_stocks = sum(len(stocks) for stocks in market_data.values())
         processed = 0
-        passed_stage1 = 0
-        passed_stage2 = 0
-        passed_stage3 = 0
-        passed_stage4 = 0
+        stage_counts = [0, 0, 0, 0]   # stocks passing stage 1..4
 
         print("\n" + "="*80)
         print("🔍 SCREENING ENTIRE MARKET")
@@ -255,38 +272,24 @@ class BatchScreener:
                 processed += 1
 
                 if processed % 10 == 0:
-                    print(f"  [{processed}/{total_stocks}] Processed: {passed_stage1}/{passed_stage2}/{passed_stage3}/{passed_stage4}")
+                    print(f"  [{processed}/{total_stocks}] Processed: "
+                          f"{stage_counts[0]}/{stage_counts[1]}/{stage_counts[2]}/{stage_counts[3]}")
 
-                result = self.screen_stock(stock_data)
+                stages_passed, details = self._run_stages(stock_data)
+                for i in range(stages_passed):
+                    stage_counts[i] += 1
 
-                # Track stage progression
-                if stock_data['prices'] is not None:
-                    darvas = self.filters.darvas_box(stock_data['prices'], stock_data['volumes'])
-                    if darvas and darvas['passed']:
-                        passed_stage1 += 1
-
-                        piotroski = self.filters.piotroski_score(stock_data['fundamentals'])
-                        if piotroski and piotroski['passed']:
-                            passed_stage2 += 1
-
-                            coffee_can = self.filters.coffee_can_check(stock_data['fundamentals'])
-                            if coffee_can and coffee_can['passed']:
-                                passed_stage3 += 1
-
-                                cmf = self.chaikin_money_flow(stock_data['volumes'])
-                                if cmf and cmf['passed']:
-                                    passed_stage4 += 1
-
-                if result:
+                valid, _msg = validate_data(stock_data)
+                if valid and stages_passed == 4:
+                    result = self._build_result(stock_data, details)
                     triple_hits.append(result)
                     self.results.append(result)
 
-        print(f"\n✅ Screening complete!")
+        labels = ("Darvas", "Piotroski", "Coffee Can", "CMF")
+        print("\n✅ Screening complete!")
         print(f"   Total processed: {total_stocks}")
-        print(f"   Stage 1 (Darvas): {passed_stage1} ({passed_stage1/total_stocks*100:.1f}%)")
-        print(f"   Stage 2 (Piotroski): {passed_stage2} ({passed_stage2/total_stocks*100:.1f}%)")
-        print(f"   Stage 3 (Coffee Can): {passed_stage3} ({passed_stage3/total_stocks*100:.1f}%)")
-        print(f"   Stage 4 (CMF): {passed_stage4} ({passed_stage4/total_stocks*100:.1f}%)")
+        for n, (label, count) in enumerate(zip(labels, stage_counts), 1):
+            print(f"   Stage {n} ({label}): {count} ({count/total_stocks*100:.1f}%)")
         print(f"\n🎯 TRIPLE HITS FOUND: {len(triple_hits)}")
 
         return triple_hits
@@ -322,7 +325,7 @@ def main():
     fetcher = MarketDataFetcher()
 
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=252*2)  # 2 years for faster testing
+    start_date = end_date - timedelta(days=LOOKBACK_DAYS_QUICK)  # 2 years for faster testing
 
     print(f"\nFetching data from {start_date.date()} to {end_date.date()}")
 
