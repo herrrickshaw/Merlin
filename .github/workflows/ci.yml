@@ -1,0 +1,22 @@
+name: ci
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: pip install pytest ruff pandas numpy
+      - name: Lint refactored modules
+        run: ruff check data_fetcher.py batch_screener.py screener_runner.py tests
+      - name: Byte-compile all scripts
+        run: python -m compileall -q .
+      - name: Test (no network; yfinance is stubbed)
+        run: pytest -q
