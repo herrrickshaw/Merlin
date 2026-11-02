@@ -215,7 +215,7 @@ class BatchScreener:
             ('darvas', lambda: self.filters.darvas_box(stock_data['prices'], stock_data['volumes'])),
             ('piotroski', lambda: self.filters.piotroski_score(stock_data['fundamentals'])),
             ('coffee_can', lambda: self.filters.coffee_can_check(stock_data['fundamentals'])),
-            ('cmf', lambda: self.chaikin_money_flow(stock_data['volumes'])),
+            ('cmf', lambda: self.filters.chaikin_money_flow(stock_data['volumes'])),
         )
         for name, run in steps:
             outcome = run()

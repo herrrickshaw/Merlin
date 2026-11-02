@@ -857,7 +857,8 @@
  "screen_stock_invalid": null,
  "stage_cases": {
   "all_stages": {
-   "raised": "AttributeError"
+   "hits": [],
+   "stdout": "\n================================================================================\n\ud83d\udd0d SCREENING ENTIRE MARKET\n================================================================================\n\nScreening USA (1 stocks)...\n\n\u2705 Screening complete!\n   Total processed: 1\n   Stage 1 (Darvas): 1 (100.0%)\n   Stage 2 (Piotroski): 1 (100.0%)\n   Stage 3 (Coffee Can): 1 (100.0%)\n   Stage 4 (CMF): 0 (0.0%)\n\n\ud83c\udfaf TRIPLE HITS FOUND: 0\n"
   },
   "no_fundamentals": {
    "hits": [],
