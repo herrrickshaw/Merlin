@@ -13,7 +13,7 @@ GOLDEN = ROOT / "tests" / "golden" / "scripts"
 SCRIPTS = sorted(p.stem for p in GOLDEN.glob("*.json"))
 
 
-FLOAT_RE = re.compile(r"-?\d+\.\d+(?:[eE][+-]?\d+)?")
+FLOAT_RE = re.compile(r"-?\d{1,3}(?:,\d{3})+(?:\.\d+)?|-?\d+\.\d+(?:[eE][+-]?\d+)?")
 
 
 def _round_floats(obj):
@@ -24,7 +24,7 @@ def _round_floats(obj):
     if isinstance(obj, dict):
         return {k: _round_floats(v) for k, v in obj.items()}
     if isinstance(obj, str):
-        return FLOAT_RE.sub(lambda m: format(float(m.group()), ".12g"), obj)
+        return FLOAT_RE.sub(lambda m: format(float(m.group().replace(",", "")), ".12g"), obj)
     return obj
 
 
