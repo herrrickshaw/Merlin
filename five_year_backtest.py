@@ -7,10 +7,30 @@ Tests strategy across multiple market conditions (2019-2024)
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-import yfinance as yf
 import json
 
 # ─── Simulated Real Market Testing ─────────────────────────────────────────
+
+# Simulated quality stocks (price at portfolio date, Piotroski score, Chaikin money flow)
+TRIPLE_HITS = [
+    {'symbol': 'AAPL', 'price': 175.0, 'piotroski': 9, 'cmf': 0.32},
+    {'symbol': 'MSFT', 'price': 310.0, 'piotroski': 8, 'cmf': 0.28},
+    {'symbol': 'GOOGL', 'price': 2800.0, 'piotroski': 9, 'cmf': 0.31},
+    {'symbol': 'AMZN', 'price': 3400.0, 'piotroski': 7, 'cmf': 0.18},
+    {'symbol': 'NVDA', 'price': 875.0, 'piotroski': 8, 'cmf': 0.26},
+    {'symbol': 'TSLA', 'price': 242.0, 'piotroski': 6, 'cmf': 0.12},
+    {'symbol': 'META', 'price': 320.0, 'piotroski': 7, 'cmf': 0.15},
+    {'symbol': 'NFLX', 'price': 445.0, 'piotroski': 8, 'cmf': 0.24},
+    {'symbol': 'ADBE', 'price': 680.0, 'piotroski': 8, 'cmf': 0.22},
+    {'symbol': 'CRM', 'price': 285.0, 'piotroski': 7, 'cmf': 0.14},
+]
+
+STARTING_CAPITAL = 1000000
+DEFAULT_MARKET_RETURN_PCT = 15.0
+QUALITY_PREMIUM_MAX = 0.08  # extra daily-return term for a Piotroski 9
+ANNUAL_NOISE_VOL = 0.02
+RISK_FREE_RATE = 0.04
+
 
 class FiveYearBacktester:
     """Run backtests across 5 different historical periods"""
@@ -19,46 +39,15 @@ class FiveYearBacktester:
         self.results = []
         self.summary = None
 
-    def simulate_backtest_period(self, period_name, portfolio_date_str,
-                                  holding_period_days=252, market_return_pct=None):
-        """Simulate backtest for a specific period"""
-
-        portfolio_date = datetime.strptime(portfolio_date_str, '%Y-%m-%d')
-        end_date = portfolio_date + timedelta(days=holding_period_days)
-
-        # Simulate triple hits for this period (quality stocks)
-        triple_hits = [
-            {'symbol': 'AAPL', 'price': 175.0, 'piotroski': 9, 'cmf': 0.32},
-            {'symbol': 'MSFT', 'price': 310.0, 'piotroski': 8, 'cmf': 0.28},
-            {'symbol': 'GOOGL', 'price': 2800.0, 'piotroski': 9, 'cmf': 0.31},
-            {'symbol': 'AMZN', 'price': 3400.0, 'piotroski': 7, 'cmf': 0.18},
-            {'symbol': 'NVDA', 'price': 875.0, 'piotroski': 8, 'cmf': 0.26},
-            {'symbol': 'TSLA', 'price': 242.0, 'piotroski': 6, 'cmf': 0.12},
-            {'symbol': 'META', 'price': 320.0, 'piotroski': 7, 'cmf': 0.15},
-            {'symbol': 'NFLX', 'price': 445.0, 'piotroski': 8, 'cmf': 0.24},
-            {'symbol': 'ADBE', 'price': 680.0, 'piotroski': 8, 'cmf': 0.22},
-            {'symbol': 'CRM', 'price': 285.0, 'piotroski': 7, 'cmf': 0.14},
-        ]
-
-        # Calculate quality-weighted allocation
+    @staticmethod
+    def _quality_weights(triple_hits):
+        """Weight each stock by piotroski + 3*cmf, normalised to sum to 1."""
         total_quality = sum(h['piotroski'] + h['cmf']*3 for h in triple_hits)
-        portfolio = {
-            'date': portfolio_date_str,
-            'end_date': end_date.strftime('%Y-%m-%d'),
-            'starting_capital': 1000000,
-            'stocks': triple_hits,
-            'weights': {},
-        }
+        return {hit['symbol']: (hit['piotroski'] + hit['cmf'] * 3) / total_quality for hit in triple_hits}
 
-        for hit in triple_hits:
-            quality = hit['piotroski'] + hit['cmf'] * 3
-            portfolio['weights'][hit['symbol']] = quality / total_quality
-
-        # Simulate price movements based on market conditions
-        if market_return_pct is None:
-            market_return_pct = 15.0  # Default assumption
-
-        # Individual stock performance (quality stocks outperform)
+    @staticmethod
+    def _simulate_daily_prices(triple_hits, portfolio_date, end_date, market_return_pct):
+        """Daily price path per stock (market return + quality premium + noise); consumes numpy RNG."""
         daily_prices = []
         dates = pd.date_range(start=portfolio_date, end=end_date, freq='D')
 
@@ -70,48 +59,45 @@ class FiveYearBacktester:
                 symbol = hit['symbol']
 
                 # Base return + market return + quality premium
-                quality_premium = (hit['piotroski'] / 9.0) * 0.08  # Up to 8% extra
-                daily_vol = 0.02 / np.sqrt(252)  # ~2% annual vol
+                quality_premium = (hit['piotroski'] / 9.0) * QUALITY_PREMIUM_MAX  # Up to 8% extra
+                daily_vol = ANNUAL_NOISE_VOL / np.sqrt(252)  # ~2% annual vol
 
                 # Price path (GBM)
                 daily_return = (market_return_pct / 100 / 252) + quality_premium + np.random.normal(0, daily_vol)
-                new_price = hit['price'] * (1 + daily_return) ** days_elapsed
-
-                day_prices[symbol] = new_price
+                day_prices[symbol] = hit['price'] * (1 + daily_return) ** days_elapsed
 
             daily_prices.append({
                 'date': date.strftime('%Y-%m-%d'),
                 'prices': day_prices
             })
+        return daily_prices
 
-        # Calculate portfolio performance
+    @staticmethod
+    def _portfolio_values(triple_hits, weights, total_capital, daily_prices):
+        """Mark the portfolio to market for every simulated day."""
         portfolio_values = []
-        total_capital = portfolio['starting_capital']
-
         for day_data in daily_prices:
             portfolio_value = 0
 
             for hit in triple_hits:
                 symbol = hit['symbol']
-                weight = portfolio['weights'][symbol]
-                position_value = total_capital * weight
+                position_value = total_capital * weights[symbol]
 
                 # Adjust for current price
-                current_price = day_data['prices'][symbol]
                 shares = position_value / hit['price']
-                position_current = shares * current_price
-
-                portfolio_value += position_current
+                portfolio_value += shares * day_data['prices'][symbol]
 
             portfolio_values.append({
                 'date': day_data['date'],
                 'value': portfolio_value
             })
+        return portfolio_values
 
-        # Calculate metrics
+    @staticmethod
+    def _performance_metrics(portfolio_values, total_capital):
+        """Return, volatility, drawdown, Sharpe and win rate (all percent) from daily values."""
         final_value = portfolio_values[-1]['value']
         total_return = (final_value - total_capital) / total_capital * 100
-        annual_return = total_return  # Assuming ~1 year
 
         values = np.array([pv['value'] for pv in portfolio_values])
         daily_returns = np.diff(values) / values[:-1] * 100
@@ -121,30 +107,49 @@ class FiveYearBacktester:
         drawdown = (values - cummax) / cummax * 100
         max_drawdown = np.min(drawdown)
 
-        excess_returns = daily_returns - (0.04 / 252 * 100)
+        excess_returns = daily_returns - (RISK_FREE_RATE / 252 * 100)
         sharpe = np.mean(excess_returns) / np.std(excess_returns) * np.sqrt(252) if len(excess_returns) > 0 else 0
 
         win_days = np.sum(daily_returns > 0)
         win_rate = win_days / len(daily_returns) * 100
+        return {'final_value': final_value, 'total_return': total_return, 'volatility': volatility,
+                'max_drawdown': max_drawdown, 'sharpe': sharpe, 'win_rate': win_rate}
 
-        result = {
+    def simulate_backtest_period(self, period_name, portfolio_date_str,
+                                  holding_period_days=252, market_return_pct=None):
+        """Simulate backtest for a specific period"""
+
+        portfolio_date = datetime.strptime(portfolio_date_str, '%Y-%m-%d')
+        end_date = portfolio_date + timedelta(days=holding_period_days)
+
+        triple_hits = TRIPLE_HITS
+        total_capital = STARTING_CAPITAL
+        weights = self._quality_weights(triple_hits)
+
+        # Simulate price movements based on market conditions
+        if market_return_pct is None:
+            market_return_pct = DEFAULT_MARKET_RETURN_PCT  # Default assumption
+
+        daily_prices = self._simulate_daily_prices(triple_hits, portfolio_date, end_date, market_return_pct)
+        portfolio_values = self._portfolio_values(triple_hits, weights, total_capital, daily_prices)
+        m = self._performance_metrics(portfolio_values, total_capital)
+
+        return {
             'period': period_name,
             'portfolio_date': portfolio_date_str,
             'end_date': end_date.strftime('%Y-%m-%d'),
             'starting_capital': total_capital,
-            'ending_value': final_value,
-            'total_return_pct': total_return,
-            'annual_return_pct': annual_return,
-            'volatility_pct': volatility,
-            'max_drawdown_pct': max_drawdown,
-            'sharpe_ratio': sharpe,
-            'win_rate_pct': win_rate,
+            'ending_value': m['final_value'],
+            'total_return_pct': m['total_return'],
+            'annual_return_pct': m['total_return'],  # Assuming ~1 year
+            'volatility_pct': m['volatility'],
+            'max_drawdown_pct': m['max_drawdown'],
+            'sharpe_ratio': m['sharpe'],
+            'win_rate_pct': m['win_rate'],
             'stocks': len(triple_hits),
             'market_condition': self.classify_market(market_return_pct),
             'daily_values': portfolio_values,
         }
-
-        return result
 
     def classify_market(self, market_return):
         """Classify market conditions"""
@@ -207,7 +212,7 @@ class FiveYearBacktester:
             )
 
             self.results.append(result)
-            print(f" ✓")
+            print(" ✓")
 
         return self.results
 
@@ -223,28 +228,28 @@ class FiveYearBacktester:
             print(f"Period {i}: {result['period']}")
             print(f"{'─'*100}")
 
-            print(f"\n📅 Timeline:")
+            print("\n📅 Timeline:")
             print(f"   Portfolio Date: {result['portfolio_date']}")
             print(f"   End Date:       {result['end_date']}")
-            print(f"   Duration:       252 days (1 year)")
+            print("   Duration:       252 days (1 year)")
             print(f"   Market Class:   {result['market_condition']} Market")
 
-            print(f"\n💰 Returns:")
+            print("\n💰 Returns:")
             print(f"   Starting Capital: ${result['starting_capital']:>15,.0f}")
             print(f"   Ending Value:     ${result['ending_value']:>15,.0f}")
             print(f"   Absolute Gain:    ${result['ending_value'] - result['starting_capital']:>15,.0f}")
             print(f"   Total Return:     {result['total_return_pct']:>15.2f}%")
             print(f"   Annual Return:    {result['annual_return_pct']:>15.2f}%")
 
-            print(f"\n📊 Risk Metrics:")
+            print("\n📊 Risk Metrics:")
             print(f"   Volatility:       {result['volatility_pct']:>15.2f}%")
             print(f"   Max Drawdown:     {result['max_drawdown_pct']:>15.2f}%")
             print(f"   Sharpe Ratio:     {result['sharpe_ratio']:>15.2f}")
             print(f"   Win Rate:         {result['win_rate_pct']:>15.2f}%")
 
-            print(f"\n🎯 Portfolio:")
+            print("\n🎯 Portfolio:")
             print(f"   Stocks:           {result['stocks']:>15} positions")
-            print(f"   Strategy:         Quality-weighted (Piotroski + CMF)")
+            print("   Strategy:         Quality-weighted (Piotroski + CMF)")
 
     def print_summary_statistics(self):
         """Print aggregate statistics across all periods"""
@@ -264,7 +269,7 @@ class FiveYearBacktester:
         volatilities = [r['volatility_pct'] for r in self.results]
         win_rates = [r['win_rate_pct'] for r in self.results]
 
-        print(f"\n📈 RETURNS ANALYSIS:")
+        print("\n📈 RETURNS ANALYSIS:")
         print(f"   Average Annual Return:  {np.mean(returns):>12.2f}%")
         print(f"   Median Annual Return:   {np.median(returns):>12.2f}%")
         print(f"   Std Dev of Returns:     {np.std(returns):>12.2f}%")
@@ -272,13 +277,13 @@ class FiveYearBacktester:
         print(f"   Worst Year:             {np.min(returns):>12.2f}% ({self.results[np.argmin(returns)]['period']})")
         print(f"   Range:                  {np.max(returns) - np.min(returns):>12.2f}%")
 
-        print(f"\n📊 RISK METRICS:")
+        print("\n📊 RISK METRICS:")
         print(f"   Average Volatility:     {np.mean(volatilities):>12.2f}%")
         print(f"   Average Drawdown:       {np.mean(drawdowns):>12.2f}%")
         print(f"   Worst Drawdown:         {np.min(drawdowns):>12.2f}%")
         print(f"   Average Sharpe Ratio:   {np.mean(sharpes):>12.2f}")
 
-        print(f"\n✅ WIN RATE:")
+        print("\n✅ WIN RATE:")
         print(f"   Average Win Rate:       {np.mean(win_rates):>12.2f}%")
         print(f"   Median Win Rate:        {np.median(win_rates):>12.2f}%")
 
@@ -288,14 +293,14 @@ class FiveYearBacktester:
             cumulative_return *= (1 + r['total_return_pct'] / 100)
         cumulative_return = (cumulative_return - 1) * 100
 
-        print(f"\n💎 CUMULATIVE PERFORMANCE:")
+        print("\n💎 CUMULATIVE PERFORMANCE:")
         print(f"   5-Year Cumulative:      {cumulative_return:>12.2f}%")
         print(f"   Annualized 5Y Return:   {(cumulative_return / 5):>12.2f}%")
         print(f"   Implied Capital Growth: $1M → ${1000000 * (1 + cumulative_return/100):>12,.0f}")
 
         # Consistency analysis
         positive_years = sum(1 for r in returns if r > 0)
-        print(f"\n🎯 CONSISTENCY:")
+        print("\n🎯 CONSISTENCY:")
         print(f"   Positive Years:         {positive_years:>12} out of 5")
         print(f"   Success Rate:           {positive_years/5*100:>12.1f}%")
 
