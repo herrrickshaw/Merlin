@@ -177,7 +177,8 @@ def create_portfolios(stocks):
 
 # ─── Historical Backtesting ───────────────────────────────────────────────
 
-def generate_historical_prices(symbol, base_price, num_days, annual_return, annual_vol, trend='bullish', start_date=None):
+def generate_historical_prices(symbol, base_price, num_days, annual_return, annual_vol,
+                              trend='bullish', start_date=None):
     """Generate synthetic historical price data"""
     prices = []
     price = base_price
@@ -189,7 +190,7 @@ def generate_historical_prices(symbol, base_price, num_days, annual_return, annu
     daily_vol = annual_vol / math.sqrt(252)
     daily_return = annual_return / 252
 
-    for day in range(num_days):
+    for _day in range(num_days):
         # Trend component
         if trend == 'bullish':
             trend_component = daily_return * 1.5

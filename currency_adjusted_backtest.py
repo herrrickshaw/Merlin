@@ -4,10 +4,39 @@ Currency-Adjusted Yen Carry Trade Backtest
 Accounts for FX exposure of stocks and optimal currency swap strategies
 """
 
-import pandas as pd
-import numpy as np
-from datetime import datetime
 import json
+
+# Portfolio-weighted USD exposure thresholds for the profile message
+HIGH_USD_PORTFOLIO_EXPOSURE = 0.40
+MODERATE_USD_PORTFOLIO_EXPOSURE = 0.30
+
+# Yearly yen moves in percent (positive = yen weakens)
+FX_SCENARIOS = {
+    '2019-2020 (Yen weakens 5%)': 5.0,
+    '2020-2021 (Yen weakens 3%)': 3.0,
+    '2021-2022 (Yen strengthens 2%)': -2.0,
+    '2022-2023 (Yen weakens 8%)': 8.0,
+    '2023-2024 (Yen strengthens 1%)': -1.0,
+}
+
+HISTORICAL_STOCK_RETURNS = [107.34, 67.05, 36.96, -20.18, 37.53]  # From backtest, percent per year
+
+# One entry per hedging scenario; add a scenario by adding a dict here
+HEDGE_SCENARIOS = [
+    {'heading': '\nSCENARIO A: UNHEDGED (No Currency Swaps)', 'swap_ratio': 0.0,
+     'delta_label': 'FX Impact', 'total_label': 'Total Return', 'total_key': 'return_unhedged',
+     'delta': lambda r: r['return_unhedged'] - r['stock_return'],
+     'summary_label': 'Unhedged (Scenario A)', 'volatility': 'High'},
+    {'heading': '\n\nSCENARIO B: PARTIALLY HEDGED (25% Currency Swaps - Recommended)', 'swap_ratio': 0.25,
+     'delta_label': 'Net FX', 'total_label': 'After Swap', 'total_key': 'return_hedged',
+     'delta': lambda r: r['return_hedged'] - r['stock_return'],
+     'summary_label': 'Partially Hedged (Rec.)', 'volatility': 'Medium'},
+    {'heading': '\n\nSCENARIO C: FULLY HEDGED (100% Currency Swaps - Conservative)', 'swap_ratio': 1.0,
+     'delta_label': 'Swap Cost', 'total_label': 'After Swap', 'total_key': 'return_hedged',
+     'delta': lambda r: r['stock_return'] - r['return_hedged'],
+     'summary_label': 'Fully Hedged (Conservative)', 'volatility': 'Low'},
+]
+
 
 class CurrencyAdjustedCarryTrade:
     """Model FX exposure of stocks and optimal hedging"""
@@ -211,6 +240,127 @@ class CurrencyAdjustedCarryTrade:
             'neutral_count': sum(1 for p in fx_profiles if p['fx_category'] == 'NEUTRAL_OR_JPY_EXPOSED'),
         }
 
+    def _print_sensitivities(self):
+        """Section 1: FX sensitivity of each stock; returns the sensitivity records."""
+        print("\n1️⃣  FX SENSITIVITY ANALYSIS")
+        print("─" * 120)
+
+        sensitivities = [self.calculate_fx_sensitivity(code, data) for code, data in self.stocks.items()]
+
+        print(f"\n{'Stock':<8} {'Sector':<12} {'USD Rev %':<12} {'JPY Cost %':<13} "
+              f"{'Net USD Exp':<13} {'FX Category':<25}")
+        print("─" * 120)
+
+        for s in sensitivities:
+            print(f"{s['stock']:<8} {s['sector']:<12} {s['usd_revenue_pct']*100:>10.1f}% "
+                  f"{s['jpy_costs_pct']*100:>11.1f}% {s['net_usd_exposure']:>11.2f} {s['fx_category']:<25}")
+        return sensitivities
+
+    def _print_portfolio_profile(self, portfolio):
+        """Section 2: portfolio-weighted USD exposure; returns the composition analysis."""
+        print("\n2️⃣  PORTFOLIO FX PROFILE")
+        print("─" * 120)
+
+        portfolio_analysis = self.analyze_portfolio_composition(portfolio)
+        exposure = portfolio_analysis['portfolio_weighted_usd_exposure']
+        print(f"\nPortfolio-Weighted USD Exposure: {exposure:.3f}")
+        print(f"High USD-Sensitive Stocks:       {portfolio_analysis['high_usd_exposure_count']} / {len(portfolio)}")
+        print(f"Neutral/JPY-Exposed Stocks:      {portfolio_analysis['neutral_count']} / {len(portfolio)}")
+
+        if exposure >= HIGH_USD_PORTFOLIO_EXPOSURE:
+            print("→ Portfolio BENEFITS from weak yen (current structure is good)")
+        elif exposure >= MODERATE_USD_PORTFOLIO_EXPOSURE:
+            print("→ Portfolio has MODERATE USD exposure (balanced)")
+        else:
+            print("→ Portfolio is JPY/diversified (consider adding more USD-exposed stocks)")
+        return portfolio_analysis
+
+    def _print_swap_strategy(self, portfolio):
+        """Section 3: optimal swap ratio; returns the swap strategy."""
+        print("\n3️⃣  OPTIMAL CURRENCY SWAP STRATEGY")
+        print("─" * 120)
+
+        swap_strategy = self.calculate_currency_swap_ratio(portfolio, {})
+        print(f"\nAverage USD Exposure:      {swap_strategy['avg_usd_exposure']:.3f}")
+        print(f"Optimal Swap Ratio:        {swap_strategy['optimal_swap_ratio']*100:.0f}%")
+        print("\nInterpretation:")
+        print(f"  {swap_strategy['interpretation']}")
+        print("\nPractical Implementation:")
+        print("  • Initial investment: ¥100M")
+        print(f"  • Convert to USD: ${(100_000_000/100):.0f},000")
+        print(f"  • Buy stocks (unhedged): ${(100_000_000/100)*0.75:.0f},000")
+        print(f"  • Currency swap (lock in FX): ${(100_000_000/100)*0.25:.0f},000 at ¥{100:.2f}/USD")
+        print("  • Swap cost: ~1.5% per annum")
+        return swap_strategy
+
+    def _print_fx_impacts(self):
+        """Section 4: FX impact on each stock per year; returns the impacts."""
+        print("\n4️⃣  FX IMPACT ON STOCKS BY YEAR")
+        print("─" * 120)
+
+        fx_impacts = self.model_fx_impact_on_stocks(FX_SCENARIOS)
+
+        for year_name, impacts in fx_impacts.items():
+            print(f"\n{year_name}")
+            print(f"{'Stock':<8} {'Net USD Exp':<14} {'FX Change':<12} {'FX Impact on Return':<20}")
+            print("─" * 60)
+
+            for impact in impacts:
+                print(f"{impact['stock']:<8} {impact['net_exposure']:>12.3f} {impact['fx_change_pct']:>10.1f}% "
+                      f"{impact['fx_impact_on_return']:>18.2f}%")
+        return fx_impacts
+
+    def _print_hedge_scenario(self, spec):
+        """Print one hedging scenario table; returns (5-year total %, CAGR %)."""
+        print(spec['heading'])
+        print("─" * 120)
+
+        results = self.calculate_hedged_vs_unhedged(HISTORICAL_STOCK_RETURNS, FX_SCENARIOS,
+                                                    swap_ratio=spec['swap_ratio'])
+
+        print(f"\n{'Year':<25} {'Stock Ret':<12} {spec['delta_label']:<12} {spec['total_label']:<15}")
+        print("─" * 70)
+
+        cumulative = 1.0
+        for result in results:
+            delta = spec['delta'](result)
+            total = result[spec['total_key']]
+            print(f"{result['year']:<25} {result['stock_return']:>10.2f}% {delta:>10.2f}% {total:>13.2f}%")
+            cumulative *= (1 + total / 100)
+
+        five_year = (cumulative - 1) * 100
+        cagr = ((cumulative) ** (1/5) - 1) * 100
+        print(f"\n5-Year Return: {five_year:.2f}%  |  CAGR: {cagr:.2f}%")
+        return five_year, cagr
+
+    def _print_comparative_summary(self, outcomes):
+        """Section 6: side-by-side table of the three scenarios."""
+        print("\n\n6️⃣  COMPARATIVE SUMMARY")
+        print("="*120)
+
+        print(f"\n{'Strategy':<30} {'5-Year Total':<20} {'CAGR':<15} {'Volatility':<15}")
+        print("─" * 80)
+        for spec, (five_year, cagr) in zip(HEDGE_SCENARIOS, outcomes):
+            print(f"{spec['summary_label']:<30} {five_year:>18.2f}% {cagr:>13.2f}% {spec['volatility']:<15}")
+
+    @staticmethod
+    def _print_final_recommendation(exposure, hedged_cagr):
+        """Closing rationale and implementation notes for the partially hedged strategy."""
+        print("\n\n✅ RECOMMENDATION: PARTIALLY HEDGED STRATEGY")
+        print("─" * 120)
+        print("\nRationale:")
+        print(f"  1. Portfolio has {exposure:.1%} USD exposure → Benefits from weak yen")
+        print("  2. Historical FX favorable: Yen weakened 2-8% in 3/5 years")
+        print("  3. Partial hedge (25%) balances upside vs downside")
+        print(f"  4. Maintains {hedged_cagr:.1f}% CAGR while reducing volatility")
+        print("  5. Swap cost (1.5% pa) covered by enhanced stock returns")
+
+        print("\nImplementation:")
+        print("  • Swap ¥25M (25% of ¥100M borrow) at current rate (~¥100/$1)")
+        print("  • Invest ¥75M directly in USD stocks (keep FX exposure)")
+        print("  • Lock in rate for 25% position, let 75% float")
+        print(f"  • Expected net CAGR: {hedged_cagr:.2f}% after all costs including swaps")
+
     def run_analysis(self):
         """Run complete currency-adjusted analysis"""
 
@@ -222,165 +372,19 @@ class CurrencyAdjustedCarryTrade:
         # Portfolio: The triple-hit stocks
         portfolio = list(self.stocks.keys())
 
-        # 1. Analyze FX sensitivity of each stock
-        print("\n1️⃣  FX SENSITIVITY ANALYSIS")
-        print("─" * 120)
-
-        sensitivities = []
-        for stock_code, stock_data in self.stocks.items():
-            sensitivity = self.calculate_fx_sensitivity(stock_code, stock_data)
-            sensitivities.append(sensitivity)
-
-        print(f"\n{'Stock':<8} {'Sector':<12} {'USD Rev %':<12} {'JPY Cost %':<13} {'Net USD Exp':<13} {'FX Category':<25}")
-        print("─" * 120)
-
-        for s in sensitivities:
-            print(f"{s['stock']:<8} {s['sector']:<12} {s['usd_revenue_pct']*100:>10.1f}% "
-                  f"{s['jpy_costs_pct']*100:>11.1f}% {s['net_usd_exposure']:>11.2f} {s['fx_category']:<25}")
-
-        # 2. Portfolio composition analysis
-        print("\n2️⃣  PORTFOLIO FX PROFILE")
-        print("─" * 120)
-
-        portfolio_analysis = self.analyze_portfolio_composition(portfolio)
-        print(f"\nPortfolio-Weighted USD Exposure: {portfolio_analysis['portfolio_weighted_usd_exposure']:.3f}")
-        print(f"High USD-Sensitive Stocks:       {portfolio_analysis['high_usd_exposure_count']} / {len(portfolio)}")
-        print(f"Neutral/JPY-Exposed Stocks:      {portfolio_analysis['neutral_count']} / {len(portfolio)}")
-
-        if portfolio_analysis['portfolio_weighted_usd_exposure'] >= 0.40:
-            print("→ Portfolio BENEFITS from weak yen (current structure is good)")
-        elif portfolio_analysis['portfolio_weighted_usd_exposure'] >= 0.30:
-            print("→ Portfolio has MODERATE USD exposure (balanced)")
-        else:
-            print("→ Portfolio is JPY/diversified (consider adding more USD-exposed stocks)")
-
-        # 3. Currency swap recommendation
-        print("\n3️⃣  OPTIMAL CURRENCY SWAP STRATEGY")
-        print("─" * 120)
-
-        swap_strategy = self.calculate_currency_swap_ratio(portfolio, {})
-        print(f"\nAverage USD Exposure:      {swap_strategy['avg_usd_exposure']:.3f}")
-        print(f"Optimal Swap Ratio:        {swap_strategy['optimal_swap_ratio']*100:.0f}%")
-        print(f"\nInterpretation:")
-        print(f"  {swap_strategy['interpretation']}")
-        print(f"\nPractical Implementation:")
-        print(f"  • Initial investment: ¥100M")
-        print(f"  • Convert to USD: ${(100_000_000/100):.0f},000")
-        print(f"  • Buy stocks (unhedged): ${(100_000_000/100)*0.75:.0f},000")
-        print(f"  • Currency swap (lock in FX): ${(100_000_000/100)*0.25:.0f},000 at ¥{100:.2f}/USD")
-        print(f"  • Swap cost: ~1.5% per annum")
-
-        # 4. FX impact scenarios
-        print("\n4️⃣  FX IMPACT ON STOCKS BY YEAR")
-        print("─" * 120)
-
-        fx_scenarios = {
-            '2019-2020 (Yen weakens 5%)': 5.0,
-            '2020-2021 (Yen weakens 3%)': 3.0,
-            '2021-2022 (Yen strengthens 2%)': -2.0,
-            '2022-2023 (Yen weakens 8%)': 8.0,
-            '2023-2024 (Yen strengthens 1%)': -1.0,
-        }
-
-        fx_impacts = self.model_fx_impact_on_stocks(fx_scenarios)
-
-        for year_name, impacts in fx_impacts.items():
-            print(f"\n{year_name}")
-            print(f"{'Stock':<8} {'Net USD Exp':<14} {'FX Change':<12} {'FX Impact on Return':<20}")
-            print("─" * 60)
-
-            for impact in impacts:
-                print(f"{impact['stock']:<8} {impact['net_exposure']:>12.3f} {impact['fx_change_pct']:>10.1f}% "
-                      f"{impact['fx_impact_on_return']:>18.2f}%")
+        sensitivities = self._print_sensitivities()
+        portfolio_analysis = self._print_portfolio_profile(portfolio)
+        swap_strategy = self._print_swap_strategy(portfolio)
+        fx_impacts = self._print_fx_impacts()
 
         # 5. Hedged vs Unhedged Comparison
         print("\n5️⃣  HEDGED vs UNHEDGED RETURNS")
         print("─" * 120)
+        outcomes = [self._print_hedge_scenario(spec) for spec in HEDGE_SCENARIOS]
+        (unhedged_5yr, unhedged_cagr), (hedged_5yr, hedged_cagr), (full_hedge_5yr, full_hedge_cagr) = outcomes
 
-        historical_stock_returns = [107.34, 67.05, 36.96, -20.18, 37.53]  # From backtest
-
-        # Scenario 1: Unhedged (no swaps)
-        print("\nSCENARIO A: UNHEDGED (No Currency Swaps)")
-        print("─" * 120)
-
-        unhedged = self.calculate_hedged_vs_unhedged(historical_stock_returns, fx_scenarios, swap_ratio=0.0)
-
-        print(f"\n{'Year':<25} {'Stock Ret':<12} {'FX Impact':<12} {'Total Return':<15}")
-        print("─" * 70)
-
-        cumulative_unhedged = 1.0
-        for result in unhedged:
-            fx_impact = result['return_unhedged'] - result['stock_return']
-            print(f"{result['year']:<25} {result['stock_return']:>10.2f}% {fx_impact:>10.2f}% {result['return_unhedged']:>13.2f}%")
-            cumulative_unhedged *= (1 + result['return_unhedged'] / 100)
-
-        unhedged_5yr = (cumulative_unhedged - 1) * 100
-        unhedged_cagr = ((cumulative_unhedged) ** (1/5) - 1) * 100
-        print(f"\n5-Year Return: {unhedged_5yr:.2f}%  |  CAGR: {unhedged_cagr:.2f}%")
-
-        # Scenario 2: Hedged (25% swapped, based on recommendation)
-        print("\n\nSCENARIO B: PARTIALLY HEDGED (25% Currency Swaps - Recommended)")
-        print("─" * 120)
-
-        hedged = self.calculate_hedged_vs_unhedged(historical_stock_returns, fx_scenarios, swap_ratio=0.25)
-
-        print(f"\n{'Year':<25} {'Stock Ret':<12} {'Net FX':<12} {'After Swap':<15}")
-        print("─" * 70)
-
-        cumulative_hedged = 1.0
-        for result in hedged:
-            net_fx = result['return_hedged'] - result['stock_return']
-            print(f"{result['year']:<25} {result['stock_return']:>10.2f}% {net_fx:>10.2f}% {result['return_hedged']:>13.2f}%")
-            cumulative_hedged *= (1 + result['return_hedged'] / 100)
-
-        hedged_5yr = (cumulative_hedged - 1) * 100
-        hedged_cagr = ((cumulative_hedged) ** (1/5) - 1) * 100
-        print(f"\n5-Year Return: {hedged_5yr:.2f}%  |  CAGR: {hedged_cagr:.2f}%")
-
-        # Scenario 3: Fully hedged (100% swapped)
-        print("\n\nSCENARIO C: FULLY HEDGED (100% Currency Swaps - Conservative)")
-        print("─" * 120)
-
-        fully_hedged = self.calculate_hedged_vs_unhedged(historical_stock_returns, fx_scenarios, swap_ratio=1.0)
-
-        print(f"\n{'Year':<25} {'Stock Ret':<12} {'Swap Cost':<12} {'After Swap':<15}")
-        print("─" * 70)
-
-        cumulative_full_hedge = 1.0
-        for result in fully_hedged:
-            swap_cost = result['stock_return'] - result['return_hedged']
-            print(f"{result['year']:<25} {result['stock_return']:>10.2f}% {swap_cost:>10.2f}% {result['return_hedged']:>13.2f}%")
-            cumulative_full_hedge *= (1 + result['return_hedged'] / 100)
-
-        full_hedge_5yr = (cumulative_full_hedge - 1) * 100
-        full_hedge_cagr = ((cumulative_full_hedge) ** (1/5) - 1) * 100
-        print(f"\n5-Year Return: {full_hedge_5yr:.2f}%  |  CAGR: {full_hedge_cagr:.2f}%")
-
-        # 6. Summary and recommendation
-        print("\n\n6️⃣  COMPARATIVE SUMMARY")
-        print("="*120)
-
-        print(f"\n{'Strategy':<30} {'5-Year Total':<20} {'CAGR':<15} {'Volatility':<15}")
-        print("─" * 80)
-        print(f"{'Unhedged (Scenario A)':<30} {unhedged_5yr:>18.2f}% {unhedged_cagr:>13.2f}% {'High':<15}")
-        print(f"{'Partially Hedged (Rec.)':<30} {hedged_5yr:>18.2f}% {hedged_cagr:>13.2f}% {'Medium':<15}")
-        print(f"{'Fully Hedged (Conservative)':<30} {full_hedge_5yr:>18.2f}% {full_hedge_cagr:>13.2f}% {'Low':<15}")
-
-        # Final recommendation
-        print("\n\n✅ RECOMMENDATION: PARTIALLY HEDGED STRATEGY")
-        print("─" * 120)
-        print(f"\nRationale:")
-        print(f"  1. Portfolio has {portfolio_analysis['portfolio_weighted_usd_exposure']:.1%} USD exposure → Benefits from weak yen")
-        print(f"  2. Historical FX favorable: Yen weakened 2-8% in 3/5 years")
-        print(f"  3. Partial hedge (25%) balances upside vs downside")
-        print(f"  4. Maintains {hedged_cagr:.1f}% CAGR while reducing volatility")
-        print(f"  5. Swap cost (1.5% pa) covered by enhanced stock returns")
-
-        print(f"\nImplementation:")
-        print(f"  • Swap ¥25M (25% of ¥100M borrow) at current rate (~¥100/$1)")
-        print(f"  • Invest ¥75M directly in USD stocks (keep FX exposure)")
-        print(f"  • Lock in rate for 25% position, let 75% float")
-        print(f"  • Expected net CAGR: {hedged_cagr:.2f}% after all costs including swaps")
+        self._print_comparative_summary(outcomes)
+        self._print_final_recommendation(portfolio_analysis['portfolio_weighted_usd_exposure'], hedged_cagr)
 
         print("\n" + "="*120 + "\n")
 
