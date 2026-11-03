@@ -155,7 +155,7 @@ class CurrencyAdjustedCarryTrade:
 
         impacts = {}
 
-        for year, (year_name, fx_change) in enumerate(fx_changes_by_year.items()):
+        for year_name, fx_change in fx_changes_by_year.items():
             year_impacts = []
 
             for stock_code, stock_data in self.stocks.items():

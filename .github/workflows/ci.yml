@@ -15,7 +15,10 @@ jobs:
       - name: Install
         run: pip install pytest ruff pandas numpy
       - name: Lint refactored modules
-        run: ruff check data_fetcher.py batch_screener.py screener_runner.py tests
+        run: ruff check data_fetcher.py batch_screener.py screener_runner.py alternative_screens_analysis.py \
+          screening_strategy_data.py forward_5year_stock_picks.py forward_picks_data.py nbim_criteria_analysis.py \
+          options_portfolio_backtest.py currency_adjusted_backtest.py five_year_backtest.py \
+          advanced_analysis_demo.py tests
       - name: Byte-compile all scripts
         run: python -m compileall -q .
       - name: Test (no network; yfinance is stubbed)

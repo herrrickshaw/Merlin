@@ -4,6 +4,8 @@ Realistic 5-Year Backtesting with Actual Historical Data
 Uses real price history from Yahoo Finance
 """
 
+import logging
+
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
@@ -11,6 +13,8 @@ import yfinance as yf
 import json
 import warnings
 warnings.filterwarnings('ignore')
+
+logger = logging.getLogger(__name__)
 
 # ─── Realistic 5-Year Backtester ──────────────────────────────────────────
 
@@ -38,8 +42,8 @@ class Realistic5YearBacktester:
             data = yf.download(symbol, start=start_date, end=end_date, progress=False)
             if data is not None and len(data) > 0:
                 return data
-        except:
-            pass
+        except Exception as exc:
+            logger.warning("download failed for %s: %s", symbol, exc)
         return None
 
     def backtest_period(self, period_name, start_date_str, end_date_str):
@@ -87,8 +91,8 @@ class Realistic5YearBacktester:
                         'date': date,
                         'value': portfolio_value
                     })
-            except:
-                pass
+            except Exception as exc:  # skip dates without usable price data
+                logger.debug("skipping %s: %s", date, exc)
 
         if not portfolio_values or len(portfolio_values) < 100:
             print(" ✗ (insufficient trading days)")
