@@ -4,10 +4,12 @@ Apply Yen Carry Trade Criteria to NBIM Holdings (2020-2025)
 Analyze Norway's Sovereign Wealth Fund Portfolio Against Triple-Hit Screening
 """
 
-import json
 import pandas as pd
 import numpy as np
-from datetime import datetime
+
+YEARS = [2020, 2021, 2022, 2023, 2024]
+# (column in the analysis frame, label shown when that stage is missing)
+STAGE_LABELS = [('darvas', 'Darvas'), ('piotroski_pass', 'Piotroski'), ('coffee_can', 'CoffeeCan'), ('cmf', 'CMF')]
 
 class NBIMAnalyzer:
     """Analyze NBIM holdings against yen carry trade criteria"""
@@ -89,20 +91,12 @@ class NBIMAnalyzer:
             'stages_passed': sum([darvas_pass, piotroski_pass, coffee_can_pass, cmf_pass])
         }
 
-    def analyze_holdings(self):
-        """Analyze all holdings against criteria"""
-
-        print("\n" + "="*140)
-        print("NBIM HOLDINGS ANALYSIS: Yen Carry Trade Triple-Hit Screening (2020-2024)")
-        print("="*140)
-
-        # Analyze each holding
-        analysis_results = []
-
+    def _holdings_frame(self):
+        """One row per 2024 holding: attributes, screening result and yearly returns (fractions)."""
+        rows = []
         for ticker, data in self.major_holdings_2024.items():
             criteria = self.apply_triple_hit_criteria(data)
-
-            analysis_results.append({
+            row = {
                 'ticker': ticker,
                 'name': data['name'],
                 'sector': data['sector'],
@@ -114,38 +108,40 @@ class NBIMAnalyzer:
                 'cmf': criteria['cmf'],
                 'triple_hit': criteria['triple_hit'],
                 'stages_passed': criteria['stages_passed'],
-                'returns_2020': self.historical_returns[2020].get(ticker, np.nan),
-                'returns_2021': self.historical_returns[2021].get(ticker, np.nan),
-                'returns_2022': self.historical_returns[2022].get(ticker, np.nan),
-                'returns_2023': self.historical_returns[2023].get(ticker, np.nan),
-                'returns_2024': self.historical_returns[2024].get(ticker, np.nan),
-            })
+            }
+            for year in YEARS:
+                row[f'returns_{year}'] = self.historical_returns[year].get(ticker, np.nan)
+            rows.append(row)
+        return pd.DataFrame(rows)
 
-        df = pd.DataFrame(analysis_results)
+    @staticmethod
+    def _five_year_return_pct(row):
+        """Compounded 2020-2024 return in percent, skipping missing years."""
+        growth = 1.0
+        for year in YEARS:
+            ret = row[f'returns_{year}']
+            if not np.isnan(ret):
+                growth *= (1 + ret)
+        return (growth - 1) * 100
 
-        # Summary by category
+    def _print_triple_hits(self, triple_hits):
+        """Section 1: stocks passing all four stages."""
         print("\n1️⃣  TRIPLE-HIT STOCKS (Pass all 4 stages)")
         print("─" * 140)
 
-        triple_hits = df[df['triple_hit']]
         if len(triple_hits) > 0:
             print(f"\n{'Ticker':<8} {'Name':<25} {'Sector':<15} {'Piotroski':<10} {'USD Exp':<10} "
                   f"{'5Yr Ret':<12} {'2024 Ret':<10} {'Status':<15}")
             print("─" * 140)
 
             for _, row in triple_hits.iterrows():
-                returns_5yr = 1.0
-                for year in [2020, 2021, 2022, 2023, 2024]:
-                    ret = row[f'returns_{year}']
-                    if not np.isnan(ret):
-                        returns_5yr *= (1 + ret)
-                returns_5yr = (returns_5yr - 1) * 100
-
+                returns_5yr = self._five_year_return_pct(row)
                 print(f"{row['ticker']:<8} {row['name']:<25} {row['sector']:<15} {row['piotroski']:<10.0f} "
                       f"{row['usd_exposure']:<10.1%} {returns_5yr:>10.1f}% {row['returns_2024']:>8.1%} "
                       f"{'✓ TRIPLE-HIT':<15}")
 
-        # Holdings passing 3 stages
+    def _print_strong_candidates(self, df):
+        """Section 2: holdings passing exactly three stages."""
         print("\n\n2️⃣  STRONG CANDIDATES (Pass 3 stages - Close to Triple-Hit)")
         print("─" * 140)
 
@@ -155,23 +151,14 @@ class NBIMAnalyzer:
             print("─" * 140)
 
             for _, row in strong.iterrows():
-                missing = []
-                if not row['darvas']: missing.append('Darvas')
-                if not row['piotroski_pass']: missing.append('Piotroski')
-                if not row['coffee_can']: missing.append('CoffeeCan')
-                if not row['cmf']: missing.append('CMF')
-
-                returns_5yr = 1.0
-                for year in [2020, 2021, 2022, 2023, 2024]:
-                    ret = row[f'returns_{year}']
-                    if not np.isnan(ret):
-                        returns_5yr *= (1 + ret)
-                returns_5yr = (returns_5yr - 1) * 100
-
+                missing = [label for key, label in STAGE_LABELS if not row[key]]
+                returns_5yr = self._five_year_return_pct(row)
                 print(f"{row['ticker']:<8} {row['name']:<25} {', '.join(missing):<25} "
                       f"{row['piotroski']:<10.0f} {returns_5yr:>10.1f}%")
 
-        # All holdings summary
+    @staticmethod
+    def _print_summary_table(df):
+        """Section 3: every holding with its stage results."""
         print("\n\n3️⃣  COMPLETE HOLDINGS SUMMARY")
         print("─" * 140)
 
@@ -185,7 +172,9 @@ class NBIMAnalyzer:
                   f"{'✓' if row['coffee_can'] else '✗':<8} {'✓' if row['cmf'] else '✗':<6} "
                   f"{'✓' if row['triple_hit'] else '✗':<8} {row['usd_exposure']:<10.1%}")
 
-        # Statistics
+    @staticmethod
+    def _print_statistics(df, triple_hits):
+        """Section 4: pass counts; returns (total, triple_count)."""
         print("\n\n4️⃣  SCREENING STATISTICS")
         print("─" * 140)
 
@@ -198,8 +187,11 @@ class NBIMAnalyzer:
         print(f"Triple-Hit Stocks:              {triple_count} ({triple_count/total*100:.1f}%)")
         print(f"Darvas Box Pass:                {darvas_count} ({darvas_count/total*100:.1f}%)")
         print(f"Piotroski >= 7 (Quality):       {high_piotroski} ({high_piotroski/total*100:.1f}%)")
+        return total, triple_count
 
-        # FX Exposure Analysis
+    @staticmethod
+    def _print_fx_exposure(df):
+        """Section 5: USD-exposure buckets; returns (avg_usd_exp, number of low-USD holdings)."""
         print("\n\n5️⃣  PORTFOLIO FX EXPOSURE (USD-Sensitive Stocks)")
         print("─" * 140)
 
@@ -217,27 +209,18 @@ class NBIMAnalyzer:
         print(f"\nInterpretation: NBIM portfolio is {'HIGHLY' if avg_usd_exp >= 0.45 else 'MODERATELY'} "
               f"USD-exposed ({avg_usd_exp:.1%} average)")
         print("→ Benefits significantly from weak yen in carry trade strategy")
+        return avg_usd_exp, len(low_usd)
 
-        # Performance Analysis
+    def _print_performance(self, df):
+        """Section 6: triple-hit vs other holdings; returns (triple_avg, non_triple_avg) in percent."""
         print("\n\n6️⃣  HISTORICAL PERFORMANCE vs. TRIPLE-HIT CRITERIA")
         print("─" * 140)
 
-        # Compare triple-hits vs non-triple-hits
         triple_returns = []
         non_triple_returns = []
-
         for _, row in df.iterrows():
-            returns_5yr = 1.0
-            for year in [2020, 2021, 2022, 2023, 2024]:
-                ret = row[f'returns_{year}']
-                if not np.isnan(ret):
-                    returns_5yr *= (1 + ret)
-            returns_5yr = (returns_5yr - 1) * 100
-
-            if row['triple_hit']:
-                triple_returns.append(returns_5yr)
-            else:
-                non_triple_returns.append(returns_5yr)
+            returns_5yr = self._five_year_return_pct(row)
+            (triple_returns if row['triple_hit'] else non_triple_returns).append(returns_5yr)
 
         triple_avg = np.mean(triple_returns) if triple_returns else 0
         non_triple_avg = np.mean(non_triple_returns) if non_triple_returns else 0
@@ -245,12 +228,15 @@ class NBIMAnalyzer:
         print(f"\nTriple-Hit Stocks (avg 5-yr return):  {triple_avg:.1f}%")
         print(f"Non-Triple-Hit Stocks (avg):         {non_triple_avg:.1f}%")
         print(f"Outperformance:                      {triple_avg - non_triple_avg:.1f} percentage points")
+        return triple_avg, non_triple_avg
 
-        # Year-by-year performance
+    @staticmethod
+    def _print_year_by_year(triple_hits):
+        """Section 7: yearly returns of the triple-hit stocks."""
         print("\n\n7️⃣  YEAR-BY-YEAR PERFORMANCE OF TRIPLE-HITS IN NBIM PORTFOLIO")
         print("─" * 140)
 
-        for year in [2020, 2021, 2022, 2023, 2024]:
+        for year in YEARS:
             print(f"\n{year}:")
             year_returns = []
             for _, row in triple_hits.iterrows():
@@ -264,27 +250,48 @@ class NBIMAnalyzer:
                 print(f"  {'─' * 60}")
                 print(f"  Average Triple-Hit Return:  {avg_ret:>8.1%}")
 
-        # Recommendation
+    @staticmethod
+    def _print_recommendation(triple_count, total, avg_usd_exp, outperformance, n_low_usd):
+        """Section 8: findings and actionable insights."""
         print("\n\n8️⃣  RECOMMENDATION: NBIM PORTFOLIO FOR YEN CARRY TRADE")
         print("─" * 140)
 
-        print(f"\n✅ FINDINGS:")
+        print("\n✅ FINDINGS:")
         print(f"   1. NBIM holds {triple_count} triple-hit stocks ({triple_count/total*100:.0f}% of analyzed)")
-        print(f"   2. Portfolio heavily skewed to US tech (high USD exposure)")
+        print("   2. Portfolio heavily skewed to US tech (high USD exposure)")
         print(f"   3. Average USD exposure: {avg_usd_exp:.1%} (excellent for carry trade)")
-        print(f"   4. Triple-hit strategy outperformed by {triple_avg - non_triple_avg:.1f}pp over 5 years")
+        print(f"   4. Triple-hit strategy outperformed by {outperformance:.1f}pp over 5 years")
 
-        print(f"\n💡 STRATEGIC IMPLICATIONS:")
-        print(f"   • NBIM core holdings align perfectly with yen carry trade strategy")
-        print(f"   • Heavy weighting to MSFT, AAPL, GOOGL, NVDA ideal for unhedged positions")
-        print(f"   • Only {len(low_usd)} holdings need currency hedging")
-        print(f"   • Recommend 75/25 swap ratio (unhedged/hedged) as per analysis")
+        print("\n💡 STRATEGIC IMPLICATIONS:")
+        print("   • NBIM core holdings align perfectly with yen carry trade strategy")
+        print("   • Heavy weighting to MSFT, AAPL, GOOGL, NVDA ideal for unhedged positions")
+        print(f"   • Only {n_low_usd} holdings need currency hedging")
+        print("   • Recommend 75/25 swap ratio (unhedged/hedged) as per analysis")
 
-        print(f"\n🎯 ACTIONABLE INSIGHTS:")
-        print(f"   1. Replicate NBIM top 5 holdings for core ¥100M unhedged position")
-        print(f"   2. Apply 25% currency swap to lower-USD-exposure holdings (TSLA, JNJ)")
-        print(f"   3. Expected CAGR: 40%+ matching NBIM historical tech performance")
-        print(f"   4. FX tailwind: When yen weakens, NBIM positions gain 2-5% extra")
+        print("\n🎯 ACTIONABLE INSIGHTS:")
+        print("   1. Replicate NBIM top 5 holdings for core ¥100M unhedged position")
+        print("   2. Apply 25% currency swap to lower-USD-exposure holdings (TSLA, JNJ)")
+        print("   3. Expected CAGR: 40%+ matching NBIM historical tech performance")
+        print("   4. FX tailwind: When yen weakens, NBIM positions gain 2-5% extra")
+
+    def analyze_holdings(self):
+        """Analyze all holdings against criteria"""
+
+        print("\n" + "="*140)
+        print("NBIM HOLDINGS ANALYSIS: Yen Carry Trade Triple-Hit Screening (2020-2024)")
+        print("="*140)
+
+        df = self._holdings_frame()
+        triple_hits = df[df['triple_hit']]
+
+        self._print_triple_hits(triple_hits)
+        self._print_strong_candidates(df)
+        self._print_summary_table(df)
+        total, triple_count = self._print_statistics(df, triple_hits)
+        avg_usd_exp, n_low_usd = self._print_fx_exposure(df)
+        triple_avg, non_triple_avg = self._print_performance(df)
+        self._print_year_by_year(triple_hits)
+        self._print_recommendation(triple_count, total, avg_usd_exp, triple_avg - non_triple_avg, n_low_usd)
 
         print("\n" + "="*140 + "\n")
 

@@ -4,12 +4,16 @@ Historical Portfolio Constructor and Backtester
 Builds a portfolio on a historical date and tracks returns going forward
 """
 
+import logging
+
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 import yfinance as yf
 from batch_screener import BatchScreener
 from data_fetcher import MarketDataFetcher
+
+logger = logging.getLogger(__name__)
 
 # ─── Portfolio Constructor ────────────────────────────────────────────────
 
@@ -176,8 +180,8 @@ class HistoricalBacktester:
                             price = price_data.iloc[idx]['Adj Close']
                             position_value = price * pos['shares']
                             portfolio_value += position_value
-                except:
-                    pass
+                except Exception as exc:  # skip dates without usable price data
+                    logger.debug("skipping %s: %s", date_str, exc)
 
             if portfolio_value > 0:
                 daily_values.append({

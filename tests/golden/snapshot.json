@@ -1,0 +1,1199 @@
+{
+ "bad_fund": null,
+ "bad_price": null,
+ "bad_us": null,
+ "cmf": [
+  {
+   "cmf_20": 0.032404662,
+   "confidence": 0.5,
+   "passed": false,
+   "status": "NEUTRAL"
+  },
+  null,
+  null
+ ],
+ "coffee": [
+  {
+   "cash_generation": true,
+   "passed": true,
+   "profitability": true,
+   "reasonable_valuation": true,
+   "reasons": []
+  },
+  {
+   "cash_generation": false,
+   "passed": false,
+   "profitability": false,
+   "reasonable_valuation": false,
+   "reasons": [
+    "No revenue",
+    "Not profitable",
+    "Negative FCF",
+    "Valuation concern",
+    "High debt"
+   ]
+  },
+  null
+ ],
+ "darvas": {
+  "52w_high": 162.776207405,
+  "above_200ma": true,
+  "current_price": 162.671975991,
+  "passed": false,
+  "pct_off_high": 0.064033568,
+  "score": 0,
+  "vol_mult": 0.93108289
+ },
+ "darvas_short": null,
+ "fetch_stdout": "\n\ud83d\udcca Fetching USA data (25 symbols)...\n  [1/25] AAPL... \u2713\n  [2/25] MSFT... \u2713\n  [3/25] GOOGL... \u2713\n  [4/25] AMZN... \u2713\n  [5/25] NVDA... \u2713\n  [6/25] TSLA... \u2713\n  [7/25] META... \u2713\n  [8/25] JPM... \u2713\n  [9/25] V... \u2713\n  [10/25] JNJ... \u2713\n  [11/25] MA... \u2713\n  [12/25] PG... \u2713\n  [13/25] MCD... \u2713\n  [14/25] NFLX... \u2713\n  [15/25] ADBE... \u2713\n  [16/25] CRM... \u2713\n  [17/25] PYPL... \u2713\n  [18/25] INTC... \u2713\n  [19/25] AMD... \u2713\n  [20/25] CSCO... \u2713\n  [21/25] IBM... \u2713\n  [22/25] BA... \u2713\n  [23/25] GM... \u2713\n  [24/25] F... \u2713\n  [25/25] GE... \u2713\n",
+ "fund": {
+  "current_ratio": 0,
+  "debt_to_equity": 0,
+  "free_cash_flow": 0,
+  "market_cap": 5000000000.0,
+  "net_income": 0,
+  "operating_cash_flow": 0,
+  "pe_ratio": 20.0,
+  "peg_ratio": 0,
+  "profit_margin": 0,
+  "revenue": 1000000000.0,
+  "roa": 0,
+  "roe": 0.2,
+  "symbol": "AAPL"
+ },
+ "hist": {
+  "columns": [
+   "date",
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume",
+   "adjusted_close"
+  ],
+  "data": {
+   "crc": 2712233780,
+   "head": [
+    "2023-01-02 00:00:00",
+    101.053594547,
+    103.058841531
+   ],
+   "n": 2100,
+   "tail": [
+    157.498130617,
+    1531.0,
+    157.498130617
+   ]
+  },
+  "shape": [
+   300,
+   7
+  ]
+ },
+ "hist_empty": null,
+ "market_summary": {
+  "USA": [
+   "AAPL",
+   "MSFT",
+   "GOOGL",
+   "AMZN",
+   "NVDA",
+   "TSLA",
+   "META",
+   "JPM",
+   "V",
+   "JNJ",
+   "MA",
+   "PG",
+   "MCD",
+   "NFLX",
+   "ADBE",
+   "CRM",
+   "PYPL",
+   "INTC",
+   "AMD",
+   "CSCO",
+   "IBM",
+   "BA",
+   "GM",
+   "F",
+   "GE"
+  ]
+ },
+ "nse_data_empty": [
+  0,
+  0
+ ],
+ "piotroski": [
+  {
+   "efficiency": true,
+   "leverage_ok": true,
+   "passed": true,
+   "profitability": true,
+   "score": 9
+  },
+  {
+   "efficiency": false,
+   "leverage_ok": false,
+   "passed": false,
+   "profitability": false,
+   "score": 0
+  },
+  null
+ ],
+ "price": 123.5,
+ "results_df_empty": null,
+ "runner": [
+  [
+   "RELIANCE",
+   "darvas",
+   false,
+   -0.33557047,
+   {
+    "High_52w": "2980.00",
+    "LTP": "2970.00",
+    "Off_High%": "0.3",
+    "Vol_x20d": "0.00"
+   },
+   "near_high"
+  ],
+  [
+   "RELIANCE",
+   "piotroski",
+   true,
+   8.0,
+   {
+    "Accrual": "0",
+    "CFO>0": "1",
+    "F_Score": "8",
+    "NoDilute": "1",
+    "ROA>0": "1",
+    "dAT>0": "1",
+    "dCR>0": "1",
+    "dGM>0": "1",
+    "dLev<0": "1",
+    "dROA>0": "1"
+   },
+   "strong"
+  ],
+  [
+   "RELIANCE",
+   "coffee_can",
+   false,
+   18.5,
+   {
+    "DE": "0.55",
+    "DE<=1": "1",
+    "ROE": "18.5",
+    "ROE>=15": "1",
+    "RevCAGR5y": "6.8",
+    "RevCAGR>=10": "0"
+   },
+   ""
+  ],
+  [
+   "RELIANCE",
+   "magic_formula",
+   true,
+   8.5,
+   {
+    "EY>0": "1",
+    "Earnings_Yield": "8.50%",
+    "ROE": "18.5",
+    "ROE>15": "1"
+   },
+   "cheap_quality"
+  ],
+  [
+   "RELIANCE",
+   "golden_crossover",
+   false,
+   null,
+   {},
+   "insufficient_data"
+  ],
+  [
+   "TCS",
+   "darvas",
+   false,
+   -0.454545455,
+   {
+    "High_52w": "3300.00",
+    "LTP": "3285.00",
+    "Off_High%": "0.5",
+    "Vol_x20d": "0.00"
+   },
+   "near_high"
+  ],
+  [
+   "TCS",
+   "piotroski",
+   true,
+   7.0,
+   {
+    "Accrual": "0",
+    "CFO>0": "1",
+    "F_Score": "7",
+    "NoDilute": "0",
+    "ROA>0": "1",
+    "dAT>0": "1",
+    "dCR>0": "1",
+    "dGM>0": "1",
+    "dLev<0": "1",
+    "dROA>0": "1"
+   },
+   "strong"
+  ],
+  [
+   "TCS",
+   "coffee_can",
+   false,
+   22.1,
+   {
+    "DE": "0.35",
+    "DE<=1": "1",
+    "ROE": "22.1",
+    "ROE>=15": "1",
+    "RevCAGR5y": "8.1",
+    "RevCAGR>=10": "0"
+   },
+   ""
+  ],
+  [
+   "TCS",
+   "magic_formula",
+   true,
+   10.2,
+   {
+    "EY>0": "1",
+    "Earnings_Yield": "10.20%",
+    "ROE": "22.1",
+    "ROE>15": "1"
+   },
+   "cheap_quality"
+  ],
+  [
+   "TCS",
+   "golden_crossover",
+   false,
+   null,
+   {},
+   "insufficient_data"
+  ],
+  [
+   "INFY",
+   "darvas",
+   false,
+   -1.012658228,
+   {
+    "High_52w": "1975.00",
+    "LTP": "1955.00",
+    "Off_High%": "1.0",
+    "Vol_x20d": "0.00"
+   },
+   "near_high"
+  ],
+  [
+   "INFY",
+   "piotroski",
+   true,
+   8.0,
+   {
+    "Accrual": "0",
+    "CFO>0": "1",
+    "F_Score": "8",
+    "NoDilute": "1",
+    "ROA>0": "1",
+    "dAT>0": "1",
+    "dCR>0": "1",
+    "dGM>0": "1",
+    "dLev<0": "1",
+    "dROA>0": "1"
+   },
+   "strong"
+  ],
+  [
+   "INFY",
+   "coffee_can",
+   false,
+   16.8,
+   {
+    "DE": "0.68",
+    "DE<=1": "1",
+    "ROE": "16.8",
+    "ROE>=15": "1",
+    "RevCAGR5y": "8.4",
+    "RevCAGR>=10": "0"
+   },
+   ""
+  ],
+  [
+   "INFY",
+   "magic_formula",
+   true,
+   7.8,
+   {
+    "EY>0": "1",
+    "Earnings_Yield": "7.80%",
+    "ROE": "16.8",
+    "ROE>15": "1"
+   },
+   "cheap_quality"
+  ],
+  [
+   "INFY",
+   "golden_crossover",
+   false,
+   null,
+   {},
+   "insufficient_data"
+  ],
+  [
+   "WIPRO",
+   "darvas",
+   false,
+   -0.78125,
+   {
+    "High_52w": "640.00",
+    "LTP": "635.00",
+    "Off_High%": "0.8",
+    "Vol_x20d": "0.00"
+   },
+   "near_high"
+  ],
+  [
+   "WIPRO",
+   "piotroski",
+   true,
+   8.0,
+   {
+    "Accrual": "0",
+    "CFO>0": "1",
+    "F_Score": "8",
+    "NoDilute": "1",
+    "ROA>0": "1",
+    "dAT>0": "1",
+    "dCR>0": "1",
+    "dGM>0": "1",
+    "dLev<0": "1",
+    "dROA>0": "1"
+   },
+   "strong"
+  ],
+  [
+   "WIPRO",
+   "coffee_can",
+   false,
+   14.2,
+   {
+    "DE": "1.20",
+    "DE<=1": "0",
+    "ROE": "14.2",
+    "ROE>=15": "0",
+    "RevCAGR5y": "8.4",
+    "RevCAGR>=10": "0"
+   },
+   ""
+  ],
+  [
+   "WIPRO",
+   "magic_formula",
+   false,
+   5.5,
+   {
+    "EY>0": "1",
+    "Earnings_Yield": "5.50%",
+    "ROE": "14.2",
+    "ROE>15": "0"
+   },
+   ""
+  ],
+  [
+   "WIPRO",
+   "golden_crossover",
+   false,
+   null,
+   {},
+   "insufficient_data"
+  ],
+  [
+   "AXISBANK",
+   "darvas",
+   false,
+   -0.45045045,
+   {
+    "High_52w": "1110.00",
+    "LTP": "1105.00",
+    "Off_High%": "0.5",
+    "Vol_x20d": "0.00"
+   },
+   "near_high"
+  ],
+  [
+   "AXISBANK",
+   "piotroski",
+   true,
+   8.0,
+   {
+    "Accrual": "0",
+    "CFO>0": "1",
+    "F_Score": "8",
+    "NoDilute": "1",
+    "ROA>0": "1",
+    "dAT>0": "1",
+    "dCR>0": "1",
+    "dGM>0": "1",
+    "dLev<0": "1",
+    "dROA>0": "1"
+   },
+   "strong"
+  ],
+  [
+   "AXISBANK",
+   "coffee_can",
+   false,
+   17.5,
+   {
+    "DE": "1.00",
+    "DE<=1": "1",
+    "ROE": "17.5",
+    "ROE>=15": "1",
+    "RevCAGR5y": "7.4",
+    "RevCAGR>=10": "0"
+   },
+   ""
+  ],
+  [
+   "AXISBANK",
+   "magic_formula",
+   true,
+   9.1,
+   {
+    "EY>0": "1",
+    "Earnings_Yield": "9.10%",
+    "ROE": "17.5",
+    "ROE>15": "1"
+   },
+   "cheap_quality"
+  ],
+  [
+   "AXISBANK",
+   "golden_crossover",
+   false,
+   null,
+   {},
+   "insufficient_data"
+  ],
+  [
+   "HDFC",
+   "darvas",
+   false,
+   -0.775193798,
+   {
+    "High_52w": "2580.00",
+    "LTP": "2560.00",
+    "Off_High%": "0.8",
+    "Vol_x20d": "0.00"
+   },
+   "near_high"
+  ],
+  [
+   "HDFC",
+   "piotroski",
+   true,
+   8.0,
+   {
+    "Accrual": "0",
+    "CFO>0": "1",
+    "F_Score": "8",
+    "NoDilute": "1",
+    "ROA>0": "1",
+    "dAT>0": "1",
+    "dCR>0": "1",
+    "dGM>0": "1",
+    "dLev<0": "1",
+    "dROA>0": "1"
+   },
+   "strong"
+  ],
+  [
+   "HDFC",
+   "coffee_can",
+   false,
+   19.2,
+   {
+    "DE": "0.73",
+    "DE<=1": "1",
+    "ROE": "19.2",
+    "ROE>=15": "1",
+    "RevCAGR5y": "8.0",
+    "RevCAGR>=10": "0"
+   },
+   ""
+  ],
+  [
+   "HDFC",
+   "magic_formula",
+   true,
+   9.8,
+   {
+    "EY>0": "1",
+    "Earnings_Yield": "9.80%",
+    "ROE": "19.2",
+    "ROE>15": "1"
+   },
+   "cheap_quality"
+  ],
+  [
+   "HDFC",
+   "golden_crossover",
+   false,
+   null,
+   {},
+   "insufficient_data"
+  ],
+  [
+   "MARUTI",
+   "darvas",
+   false,
+   -0.568181818,
+   {
+    "High_52w": "8800.00",
+    "LTP": "8750.00",
+    "Off_High%": "0.6",
+    "Vol_x20d": "0.00"
+   },
+   "near_high"
+  ],
+  [
+   "MARUTI",
+   "piotroski",
+   true,
+   8.0,
+   {
+    "Accrual": "0",
+    "CFO>0": "1",
+    "F_Score": "8",
+    "NoDilute": "1",
+    "ROA>0": "1",
+    "dAT>0": "1",
+    "dCR>0": "1",
+    "dGM>0": "1",
+    "dLev<0": "1",
+    "dROA>0": "1"
+   },
+   "strong"
+  ],
+  [
+   "MARUTI",
+   "coffee_can",
+   false,
+   18.9,
+   {
+    "DE": "0.62",
+    "DE<=1": "1",
+    "ROE": "18.9",
+    "ROE>=15": "1",
+    "RevCAGR5y": "7.4",
+    "RevCAGR>=10": "0"
+   },
+   ""
+  ],
+  [
+   "MARUTI",
+   "magic_formula",
+   true,
+   8.9,
+   {
+    "EY>0": "1",
+    "Earnings_Yield": "8.90%",
+    "ROE": "18.9",
+    "ROE>15": "1"
+   },
+   "cheap_quality"
+  ],
+  [
+   "MARUTI",
+   "golden_crossover",
+   false,
+   null,
+   {},
+   "insufficient_data"
+  ],
+  [
+   "BAJAJFINSV",
+   "darvas",
+   false,
+   -1.006711409,
+   {
+    "High_52w": "1490.00",
+    "LTP": "1475.00",
+    "Off_High%": "1.0",
+    "Vol_x20d": "0.00"
+   },
+   "near_high"
+  ],
+  [
+   "BAJAJFINSV",
+   "piotroski",
+   true,
+   8.0,
+   {
+    "Accrual": "0",
+    "CFO>0": "1",
+    "F_Score": "8",
+    "NoDilute": "1",
+    "ROA>0": "1",
+    "dAT>0": "1",
+    "dCR>0": "1",
+    "dGM>0": "1",
+    "dLev<0": "1",
+    "dROA>0": "1"
+   },
+   "strong"
+  ],
+  [
+   "BAJAJFINSV",
+   "coffee_can",
+   false,
+   16.8,
+   {
+    "DE": "0.92",
+    "DE<=1": "1",
+    "ROE": "16.8",
+    "ROE>=15": "1",
+    "RevCAGR5y": "7.8",
+    "RevCAGR>=10": "0"
+   },
+   ""
+  ],
+  [
+   "BAJAJFINSV",
+   "magic_formula",
+   true,
+   7.5,
+   {
+    "EY>0": "1",
+    "Earnings_Yield": "7.50%",
+    "ROE": "16.8",
+    "ROE>15": "1"
+   },
+   "cheap_quality"
+  ],
+  [
+   "BAJAJFINSV",
+   "golden_crossover",
+   false,
+   null,
+   {},
+   "insufficient_data"
+  ],
+  [
+   "BHARTIARTL",
+   "darvas",
+   false,
+   -1.041666667,
+   {
+    "High_52w": "480.00",
+    "LTP": "475.00",
+    "Off_High%": "1.0",
+    "Vol_x20d": "0.00"
+   },
+   "near_high"
+  ],
+  [
+   "BHARTIARTL",
+   "piotroski",
+   true,
+   8.0,
+   {
+    "Accrual": "0",
+    "CFO>0": "1",
+    "F_Score": "8",
+    "NoDilute": "1",
+    "ROA>0": "1",
+    "dAT>0": "1",
+    "dCR>0": "1",
+    "dGM>0": "1",
+    "dLev<0": "1",
+    "dROA>0": "1"
+   },
+   "strong"
+  ],
+  [
+   "BHARTIARTL",
+   "coffee_can",
+   false,
+   8.5,
+   {
+    "DE": "1.85",
+    "DE<=1": "0",
+    "ROE": "8.5",
+    "ROE>=15": "0",
+    "RevCAGR5y": "5.9",
+    "RevCAGR>=10": "0"
+   },
+   ""
+  ],
+  [
+   "BHARTIARTL",
+   "magic_formula",
+   false,
+   3.2,
+   {
+    "EY>0": "1",
+    "Earnings_Yield": "3.20%",
+    "ROE": "8.5",
+    "ROE>15": "0"
+   },
+   ""
+  ],
+  [
+   "BHARTIARTL",
+   "golden_crossover",
+   false,
+   null,
+   {},
+   "insufficient_data"
+  ],
+  [
+   "ICICIBANK",
+   "darvas",
+   false,
+   -1.123595506,
+   {
+    "High_52w": "890.00",
+    "LTP": "880.00",
+    "Off_High%": "1.1",
+    "Vol_x20d": "0.00"
+   },
+   "near_high"
+  ],
+  [
+   "ICICIBANK",
+   "piotroski",
+   true,
+   8.0,
+   {
+    "Accrual": "0",
+    "CFO>0": "1",
+    "F_Score": "8",
+    "NoDilute": "1",
+    "ROA>0": "1",
+    "dAT>0": "1",
+    "dCR>0": "1",
+    "dGM>0": "1",
+    "dLev<0": "1",
+    "dROA>0": "1"
+   },
+   "strong"
+  ],
+  [
+   "ICICIBANK",
+   "coffee_can",
+   false,
+   17.2,
+   {
+    "DE": "1.08",
+    "DE<=1": "0",
+    "ROE": "17.2",
+    "ROE>=15": "1",
+    "RevCAGR5y": "7.7",
+    "RevCAGR>=10": "0"
+   },
+   ""
+  ],
+  [
+   "ICICIBANK",
+   "magic_formula",
+   true,
+   8.8,
+   {
+    "EY>0": "1",
+    "Earnings_Yield": "8.80%",
+    "ROE": "17.2",
+    "ROE>15": "1"
+   },
+   "cheap_quality"
+  ],
+  [
+   "ICICIBANK",
+   "golden_crossover",
+   false,
+   null,
+   {},
+   "insufficient_data"
+  ]
+ ],
+ "runner_rank": {
+  "coffee_can": [],
+  "darvas": [],
+  "golden_crossover": [],
+  "magic_formula": [
+   "TCS",
+   "HDFC",
+   "AXISBANK",
+   "MARUTI",
+   "ICICIBANK",
+   "RELIANCE",
+   "INFY",
+   "BAJAJFINSV"
+  ],
+  "piotroski": [
+   "RELIANCE",
+   "INFY",
+   "WIPRO",
+   "AXISBANK",
+   "HDFC",
+   "MARUTI",
+   "BAJAJFINSV",
+   "BHARTIARTL",
+   "ICICIBANK",
+   "TCS"
+  ]
+ },
+ "screen_market_hits": [],
+ "screen_market_stdout": "\n================================================================================\n\ud83d\udd0d SCREENING ENTIRE MARKET\n================================================================================\n\nScreening USA (1 stocks)...\n\n\u2705 Screening complete!\n   Total processed: 1\n   Stage 1 (Darvas): 0 (0.0%)\n   Stage 2 (Piotroski): 0 (0.0%)\n   Stage 3 (Coffee Can): 0 (0.0%)\n   Stage 4 (CMF): 0 (0.0%)\n\n\ud83c\udfaf TRIPLE HITS FOUND: 0\n",
+ "screen_stock_invalid": null,
+ "stage_cases": {
+  "all_stages": {
+   "hits": [],
+   "stdout": "\n================================================================================\n\ud83d\udd0d SCREENING ENTIRE MARKET\n================================================================================\n\nScreening USA (1 stocks)...\n\n\u2705 Screening complete!\n   Total processed: 1\n   Stage 1 (Darvas): 1 (100.0%)\n   Stage 2 (Piotroski): 1 (100.0%)\n   Stage 3 (Coffee Can): 1 (100.0%)\n   Stage 4 (CMF): 0 (0.0%)\n\n\ud83c\udfaf TRIPLE HITS FOUND: 0\n"
+  },
+  "no_fundamentals": {
+   "hits": [],
+   "stdout": "\n================================================================================\n\ud83d\udd0d SCREENING ENTIRE MARKET\n================================================================================\n\nScreening USA (1 stocks)...\n\n\u2705 Screening complete!\n   Total processed: 1\n   Stage 1 (Darvas): 1 (100.0%)\n   Stage 2 (Piotroski): 0 (0.0%)\n   Stage 3 (Coffee Can): 0 (0.0%)\n   Stage 4 (CMF): 0 (0.0%)\n\n\ud83c\udfaf TRIPLE HITS FOUND: 0\n"
+  },
+  "stage1_only": {
+   "hits": [],
+   "stdout": "\n================================================================================\n\ud83d\udd0d SCREENING ENTIRE MARKET\n================================================================================\n\nScreening USA (1 stocks)...\n\n\u2705 Screening complete!\n   Total processed: 1\n   Stage 1 (Darvas): 1 (100.0%)\n   Stage 2 (Piotroski): 0 (0.0%)\n   Stage 3 (Coffee Can): 0 (0.0%)\n   Stage 4 (CMF): 0 (0.0%)\n\n\ud83c\udfaf TRIPLE HITS FOUND: 0\n"
+  },
+  "stage2_pass_stage3_fail": {
+   "hits": [],
+   "stdout": "\n================================================================================\n\ud83d\udd0d SCREENING ENTIRE MARKET\n================================================================================\n\nScreening USA (1 stocks)...\n\n\u2705 Screening complete!\n   Total processed: 1\n   Stage 1 (Darvas): 1 (100.0%)\n   Stage 2 (Piotroski): 1 (100.0%)\n   Stage 3 (Coffee Can): 0 (0.0%)\n   Stage 4 (CMF): 0 (0.0%)\n\n\ud83c\udfaf TRIPLE HITS FOUND: 0\n"
+  }
+ },
+ "stock": {
+  "fundamentals": {
+   "current_ratio": 0,
+   "debt_to_equity": 0,
+   "free_cash_flow": 0,
+   "market_cap": 5000000000.0,
+   "net_income": 0,
+   "operating_cash_flow": 0,
+   "pe_ratio": 20.0,
+   "peg_ratio": 0,
+   "profit_margin": 0,
+   "revenue": 1000000000.0,
+   "roa": 0,
+   "roe": 0.2,
+   "symbol": "MSFT"
+  },
+  "prices": {
+   "columns": [
+    "date",
+    "open",
+    "high",
+    "low",
+    "close",
+    "volume",
+    "adjusted_close"
+   ],
+   "data": {
+    "crc": 2459452814,
+    "head": [
+     "2023-01-02 00:00:00",
+     99.476776793,
+     100.864431458
+    ],
+    "n": 2100,
+    "tail": [
+     162.671975991,
+     1426.0,
+     162.671975991
+    ]
+   },
+   "shape": [
+    300,
+    7
+   ]
+  },
+  "symbol": "MSFT",
+  "volumes": {
+   "close": {
+    "crc": 3364208815,
+    "head": [
+     99.576776793,
+     99.22048028,
+     99.457868216
+    ],
+    "n": 300,
+    "tail": [
+     161.804790784,
+     162.776207405,
+     162.671975991
+    ]
+   },
+   "dates": {
+    "crc": 166115168,
+    "head": [
+     "2023-01-02",
+     "2023-01-03",
+     "2023-01-04"
+    ],
+    "n": 300,
+    "tail": [
+     "2024-02-21",
+     "2024-02-22",
+     "2024-02-23"
+    ]
+   },
+   "high": {
+    "crc": 2062761819,
+    "head": [
+     100.864431458,
+     100.960997432,
+     101.034589942
+    ],
+    "n": 300,
+    "tail": [
+     162.674379247,
+     164.029036427,
+     163.034107238
+    ]
+   },
+   "low": {
+    "crc": 2261439475,
+    "head": [
+     98.105801692,
+     98.082544212,
+     97.847348889
+    ],
+    "n": 300,
+    "tail": [
+     161.293828712,
+     161.134540396,
+     161.355111783
+    ]
+   },
+   "open": {
+    "crc": 1434301073,
+    "head": [
+     99.476776793,
+     99.12048028,
+     99.357868216
+    ],
+    "n": 300,
+    "tail": [
+     161.704790784,
+     162.676207405,
+     162.571975991
+    ]
+   },
+   "symbol": "MSFT",
+   "volume": {
+    "crc": 942266277,
+    "head": [
+     1901.0,
+     1069.0,
+     1278.0
+    ],
+    "n": 300,
+    "tail": [
+     1540.0,
+     1178.0,
+     1426.0
+    ]
+   }
+  }
+ },
+ "symbols": {
+  "BSE": [
+   "ABSLDWIN.BO",
+   "AFTL.BO",
+   "AMERBSES.BO",
+   "ANSAFETY.BO",
+   "APCL.BO"
+  ],
+  "NSE": [
+   "RELIANCE.NS",
+   "TCS.NS",
+   "INFY.NS",
+   "WIPRO.NS",
+   "AXISBANK.NS",
+   "HDFC.NS",
+   "MARUTI.NS",
+   "BAJAJFINSV.NS",
+   "BHARTIARTL.NS",
+   "ICICIBANK.NS",
+   "SBIN.NS",
+   "HCLTECH.NS",
+   "TECHM.NS",
+   "ASIANPAINT.NS",
+   "DMART.NS",
+   "SUNPHARMA.NS",
+   "HINDUNILVR.NS",
+   "LT.NS",
+   "LTTS.NS",
+   "INDIGO.NS",
+   "ADANIENT.NS",
+   "ADANIPORTS.NS",
+   "APOLLOHOSP.NS",
+   "ASHOKLEY.NS",
+   "AUBANK.NS"
+  ],
+  "USA": [
+   "AAPL",
+   "MSFT",
+   "GOOGL",
+   "AMZN",
+   "NVDA",
+   "TSLA",
+   "META",
+   "JPM",
+   "V",
+   "JNJ",
+   "MA",
+   "PG",
+   "MCD",
+   "NFLX",
+   "ADBE",
+   "CRM",
+   "PYPL",
+   "INTC",
+   "AMD",
+   "CSCO",
+   "IBM",
+   "BA",
+   "GM",
+   "F",
+   "GE"
+  ]
+ },
+ "symbols_us": {
+  "USA": [
+   "AAPL",
+   "MSFT",
+   "GOOGL",
+   "AMZN",
+   "NVDA",
+   "TSLA",
+   "META",
+   "JPM",
+   "V",
+   "JNJ",
+   "MA",
+   "PG",
+   "MCD",
+   "NFLX",
+   "ADBE",
+   "CRM",
+   "PYPL",
+   "INTC",
+   "AMD",
+   "CSCO",
+   "IBM",
+   "BA",
+   "GM",
+   "F",
+   "GE"
+  ]
+ },
+ "validate": [
+  [
+   true,
+   "Valid"
+  ],
+  [
+   false,
+   "No price data"
+  ]
+ ],
+ "volume": {
+  "close": {
+   "crc": 4123297096,
+   "head": [
+    101.153594547,
+    101.66718471,
+    103.616480554
+   ],
+   "n": 300,
+   "tail": [
+    158.924262024,
+    158.593320262,
+    157.498130617
+   ]
+  },
+  "dates": {
+   "crc": 166115168,
+   "head": [
+    "2023-01-02",
+    "2023-01-03",
+    "2023-01-04"
+   ],
+   "n": 300,
+   "tail": [
+    "2024-02-21",
+    "2024-02-22",
+    "2024-02-23"
+   ]
+  },
+  "high": {
+   "crc": 757813701,
+   "head": [
+    103.058841531,
+    103.19008976,
+    104.346833638
+   ],
+   "n": 300,
+   "tail": [
+    160.462195699,
+    158.806352223,
+    158.098950668
+   ]
+  },
+  "low": {
+   "crc": 350739221,
+   "head": [
+    100.413404346,
+    99.744817067,
+    102.178208774
+   ],
+   "n": 300,
+   "tail": [
+    158.720821553,
+    157.340576987,
+    156.102138459
+   ]
+  },
+  "open": {
+   "crc": 38886786,
+   "head": [
+    101.053594547,
+    101.56718471,
+    103.516480554
+   ],
+   "n": 300,
+   "tail": [
+    158.824262024,
+    158.493320262,
+    157.398130617
+   ]
+  },
+  "symbol": "AAPL",
+  "volume": {
+   "crc": 1421054678,
+   "head": [
+    1935.0,
+    1952.0,
+    1553.0
+   ],
+   "n": 300,
+   "tail": [
+    1865.0,
+    1995.0,
+    1531.0
+   ]
+  }
+ }
+}

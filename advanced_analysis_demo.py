@@ -7,7 +7,6 @@ Shows the capabilities of the enhanced OCaml screener with statistical analysis
 import csv
 import math
 import statistics
-from pathlib import Path
 from datetime import datetime, timedelta
 import random
 
@@ -165,6 +164,8 @@ def detect_outliers_iqr(values):
     upper = q3 + 1.5 * iqr_val
     return [v for v in values if v < lower or v > upper]
 
+REPORT_STOCK_LIMIT = 5
+
 # Generate realistic test data
 
 def generate_realistic_data(filename, num_stocks=10, num_days=252):
@@ -211,12 +212,8 @@ def generate_realistic_data(filename, num_stocks=10, num_days=252):
                     'volume': volume
                 })
 
-def analyze_stock_data(filename):
-    """Analyze stock data comprehensively"""
-    print(f"\n{'='*80}")
-    print(f"ADVANCED ANALYSIS REPORT")
-    print(f"{'='*80}\n")
-
+def load_stocks(filename):
+    """Read the CSV into {symbol: [{'date', 'close', 'volume'}, ...]} (file order)."""
     # Group data by symbol
     stocks = {}
     with open(filename) as f:
@@ -230,79 +227,84 @@ def analyze_stock_data(filename):
                 'close': float(row['close']),
                 'volume': int(row['volume'])
             })
+    return stocks
 
-    # Analyze each stock
-    for symbol in sorted(stocks.keys())[:5]:  # Show first 5
-        data = stocks[symbol]
-        prices = [d['close'] for d in data]
-        volumes = [d['volume'] for d in data]
 
-        returns = simple_returns(prices)
+def print_stock_report(symbol, data):
+    """Print the seven-section report (price, distribution, returns, risk, anomalies, momentum, performance)."""
+    prices = [d['close'] for d in data]
 
-        print(f"\n{'─'*80}")
-        print(f"📈 {symbol}")
-        print(f"{'─'*80}")
+    returns = simple_returns(prices)
 
-        # Price metrics
-        print(f"\n1️⃣  PRICE ANALYSIS")
-        print(f"   Current: ${prices[-1]:.2f}")
-        print(f"   High: ${max(prices):.2f} | Low: ${min(prices):.2f}")
-        print(f"   Average: ${mean(prices):.2f}")
+    print(f"\n{'─'*80}")
+    print(f"📈 {symbol}")
+    print(f"{'─'*80}")
 
-        # Statistical metrics
-        print(f"\n2️⃣  DISTRIBUTION")
-        m = mean(prices)
-        s = stddev(prices)
-        print(f"   Mean: ${m:.2f} | StdDev: ${s:.2f}")
-        print(f"   Skewness: {skewness(prices):.4f} ({'right-skewed' if skewness(prices) and skewness(prices) > 0 else 'left-skewed'})")
-        print(f"   Kurtosis: {kurtosis(prices):.4f} ({'fat-tails' if kurtosis(prices) and kurtosis(prices) > 0 else 'thin-tails'})")
+    # Price metrics
+    print("\n1️⃣  PRICE ANALYSIS")
+    print(f"   Current: ${prices[-1]:.2f}")
+    print(f"   High: ${max(prices):.2f} | Low: ${min(prices):.2f}")
+    print(f"   Average: ${mean(prices):.2f}")
 
-        q = quartiles(prices)
-        if q:
-            print(f"   Q1: ${q[0]:.2f} | Median: ${q[1]:.2f} | Q3: ${q[2]:.2f}")
-            print(f"   IQR: ${iqr(prices):.2f}")
+    # Statistical metrics
+    print("\n2️⃣  DISTRIBUTION")
+    m = mean(prices)
+    s = stddev(prices)
+    print(f"   Mean: ${m:.2f} | StdDev: ${s:.2f}")
+    skew = skewness(prices)
+    kurt = kurtosis(prices)
+    print(f"   Skewness: {skew:.4f} ({'right-skewed' if skew and skew > 0 else 'left-skewed'})")
+    print(f"   Kurtosis: {kurt:.4f} ({'fat-tails' if kurt and kurt > 0 else 'thin-tails'})")
 
-        # Return metrics
-        print(f"\n3️⃣  RETURN ANALYSIS")
-        total_ret = (prices[-1] - prices[0]) / prices[0] * 100
-        print(f"   Total Return: {total_ret:.2f}%")
-        print(f"   Daily Mean: {mean(returns)*100:.4f}%")
-        print(f"   Daily StdDev: {stddev(returns)*100:.4f}%")
-        print(f"   Annualized Vol: {stddev(returns)*math.sqrt(252)*100:.2f}%")
+    q = quartiles(prices)
+    if q:
+        print(f"   Q1: ${q[0]:.2f} | Median: ${q[1]:.2f} | Q3: ${q[2]:.2f}")
+        print(f"   IQR: ${iqr(prices):.2f}")
 
-        # Risk metrics
-        print(f"\n4️⃣  RISK METRICS")
-        dd = max_drawdown(prices)
-        print(f"   Max Drawdown: {dd*100:.2f}%")
-        print(f"   Sharpe Ratio: {sharpe_ratio(returns):.4f}")
-        print(f"   Sortino Ratio: {sortino_ratio(returns):.4f}")
-        print(f"   Calmar Ratio: {calmar_ratio(returns, prices):.4f}")
+    # Return metrics
+    print("\n3️⃣  RETURN ANALYSIS")
+    total_ret = (prices[-1] - prices[0]) / prices[0] * 100
+    print(f"   Total Return: {total_ret:.2f}%")
+    print(f"   Daily Mean: {mean(returns)*100:.4f}%")
+    print(f"   Daily StdDev: {stddev(returns)*100:.4f}%")
+    print(f"   Annualized Vol: {stddev(returns)*math.sqrt(252)*100:.2f}%")
 
-        # Anomalies
-        print(f"\n5️⃣  ANOMALY DETECTION")
-        z_outliers = detect_outliers_zscore(prices, 2.5)
-        iqr_outliers = detect_outliers_iqr(prices)
-        print(f"   Z-score outliers (2.5σ): {len(z_outliers)} ({len(z_outliers)/len(prices)*100:.1f}%)")
-        print(f"   IQR outliers: {len(iqr_outliers)} ({len(iqr_outliers)/len(prices)*100:.1f}%)")
+    # Risk metrics
+    print("\n4️⃣  RISK METRICS")
+    dd = max_drawdown(prices)
+    print(f"   Max Drawdown: {dd*100:.2f}%")
+    print(f"   Sharpe Ratio: {sharpe_ratio(returns):.4f}")
+    print(f"   Sortino Ratio: {sortino_ratio(returns):.4f}")
+    print(f"   Calmar Ratio: {calmar_ratio(returns, prices):.4f}")
 
-        # Momentum
-        print(f"\n6️⃣  MOMENTUM")
-        m10 = momentum(prices, 10)
-        m20 = momentum(prices, 20)
-        rsi14 = rsi(prices, 14)
-        print(f"   10-day momentum: {m10:.2f}%")
-        print(f"   20-day momentum: {m20:.2f}%")
-        print(f"   RSI (14): {rsi14:.2f}")
+    # Anomalies
+    print("\n5️⃣  ANOMALY DETECTION")
+    z_outliers = detect_outliers_zscore(prices, 2.5)
+    iqr_outliers = detect_outliers_iqr(prices)
+    print(f"   Z-score outliers (2.5σ): {len(z_outliers)} ({len(z_outliers)/len(prices)*100:.1f}%)")
+    print(f"   IQR outliers: {len(iqr_outliers)} ({len(iqr_outliers)/len(prices)*100:.1f}%)")
 
-        # Win rate
-        print(f"\n7️⃣  PERFORMANCE")
-        wins = len([r for r in returns if r > 0])
-        print(f"   Win rate: {wins/len(returns)*100:.1f}%")
-        print(f"   Profit factor: {sum(r for r in returns if r > 0) / abs(sum(r for r in returns if r < 0)):.2f}")
+    # Momentum
+    print("\n6️⃣  MOMENTUM")
+    m10 = momentum(prices, 10)
+    m20 = momentum(prices, 20)
+    rsi14 = rsi(prices, 14)
+    print(f"   10-day momentum: {m10:.2f}%")
+    print(f"   20-day momentum: {m20:.2f}%")
+    print(f"   RSI (14): {rsi14:.2f}")
 
+    # Win rate
+    print("\n7️⃣  PERFORMANCE")
+    wins = len([r for r in returns if r > 0])
+    print(f"   Win rate: {wins/len(returns)*100:.1f}%")
+    print(f"   Profit factor: {sum(r for r in returns if r > 0) / abs(sum(r for r in returns if r < 0)):.2f}")
+
+
+def print_summary(stocks):
+    """Print stock/day counts and a sample cross-stock correlation."""
     # Summary statistics
     print(f"\n{'='*80}")
-    print(f"SUMMARY")
+    print("SUMMARY")
     print(f"{'='*80}")
     print(f"Total stocks analyzed: {len(stocks)}")
     print(f"Days of data: {len(stocks[list(stocks.keys())[0]])}")
@@ -315,10 +317,25 @@ def analyze_stock_data(filename):
         corr = correlation(prices1, prices2)
         print(f"Sample correlation ({symbols[0]} vs {symbols[1]}): {corr:.4f}")
 
-    print(f"\n✅ Analysis complete!\n")
+    print("\n✅ Analysis complete!\n")
+
+
+def analyze_stock_data(filename):
+    """Analyze stock data comprehensively"""
+    print(f"\n{'='*80}")
+    print("ADVANCED ANALYSIS REPORT")
+    print(f"{'='*80}\n")
+
+    stocks = load_stocks(filename)
+
+    # Analyze each stock
+    for symbol in sorted(stocks.keys())[:REPORT_STOCK_LIMIT]:  # Show first 5
+        print_stock_report(symbol, stocks[symbol])
+
+    print_summary(stocks)
+
 
 def main():
-    import sys
 
     data_file = '/tmp/advanced_test_data.csv'
 
@@ -329,14 +346,14 @@ def main():
     analyze_stock_data(data_file)
 
     print(f"💾 Test data saved to: {data_file}")
-    print(f"\nThis demonstrates the capabilities that would be available in the OCaml version:")
-    print(f"  ✓ 12+ statistical metrics")
-    print(f"  ✓ Risk analysis (Sharpe, Sortino, Calmar)")
-    print(f"  ✓ Anomaly detection (Z-score, IQR)")
-    print(f"  ✓ Correlation analysis")
-    print(f"  ✓ Momentum indicators (RSI, Momentum)")
-    print(f"  ✓ Performance metrics (Win rate, Profit factor)")
-    print(f"  ✓ All with 30-50x speedup in OCaml!")
+    print("\nThis demonstrates the capabilities that would be available in the OCaml version:")
+    print("  ✓ 12+ statistical metrics")
+    print("  ✓ Risk analysis (Sharpe, Sortino, Calmar)")
+    print("  ✓ Anomaly detection (Z-score, IQR)")
+    print("  ✓ Correlation analysis")
+    print("  ✓ Momentum indicators (RSI, Momentum)")
+    print("  ✓ Performance metrics (Win rate, Profit factor)")
+    print("  ✓ All with 30-50x speedup in OCaml!")
 
 if __name__ == "__main__":
     main()
