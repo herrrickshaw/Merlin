@@ -290,87 +290,98 @@ def analyze_backtest_cohort(cohort_results):
 
 # ─── Main Test ────────────────────────────────────────────────────────────
 
-def main():
-    print("\n" + "="*90)
-    print("OPTIONS + PORTFOLIO OPTIMIZATION + 5-YEAR BACKTEST")
-    print("="*90)
+# Sample triple-hit stocks (Darvas + Piotroski + Coffee Can + CMF) used by the demo
+SAMPLE_TRIPLE_HITS = [
+    {
+        'symbol': 'TH_001',
+        'expected_return': 0.20,
+        'volatility': 0.25,
+        'dividend': 0.02,
+        'piotroski': 9,
+        'cmf': 0.35,
+    },
+    {
+        'symbol': 'TH_002',
+        'expected_return': 0.18,
+        'volatility': 0.22,
+        'dividend': 0.015,
+        'piotroski': 8,
+        'cmf': 0.28,
+    },
+    {
+        'symbol': 'TH_003',
+        'expected_return': 0.22,
+        'volatility': 0.28,
+        'dividend': 0.025,
+        'piotroski': 9,
+        'cmf': 0.32,
+    },
+    {
+        'symbol': 'TH_004',
+        'expected_return': 0.16,
+        'volatility': 0.20,
+        'dividend': 0.01,
+        'piotroski': 7,
+        'cmf': 0.18,
+    },
+    {
+        'symbol': 'TH_005',
+        'expected_return': 0.19,
+        'volatility': 0.24,
+        'dividend': 0.02,
+        'piotroski': 8,
+        'cmf': 0.25,
+    },
+]
 
-    # Create sample triple hit stocks
+# Backtest cohorts: entry dates, one-year holding
+ENTRY_DATES = ['2020-01-15', '2021-01-15', '2022-01-15', '2023-01-15']
+HOLDING_PERIOD_DAYS = 252
+FIVE_YEARS_DAYS = 252 * 5
+OPTIONS_SPOT = 100.0
+OPTIONS_DAYS = 90
+
+
+def _banner(title, char="=", trailing_newline=False):
+    """Print a title between two rules of ``char`` (90 wide)."""
+    print("\n" + char*90)
+    print(title)
+    print(char*90 + ("\n" if trailing_newline else ""))
+
+
+def print_sample_stocks(stocks):
+    """Print one summary line per sample stock."""
     print("\n" + "─"*90)
     print("📊 SAMPLE TRIPLE HITS (Pass: Darvas + Piotroski + Coffee Can + CMF)")
     print("─"*90 + "\n")
-
-    stocks = [
-        {
-            'symbol': 'TH_001',
-            'expected_return': 0.20,
-            'volatility': 0.25,
-            'dividend': 0.02,
-            'piotroski': 9,
-            'cmf': 0.35,
-        },
-        {
-            'symbol': 'TH_002',
-            'expected_return': 0.18,
-            'volatility': 0.22,
-            'dividend': 0.015,
-            'piotroski': 8,
-            'cmf': 0.28,
-        },
-        {
-            'symbol': 'TH_003',
-            'expected_return': 0.22,
-            'volatility': 0.28,
-            'dividend': 0.025,
-            'piotroski': 9,
-            'cmf': 0.32,
-        },
-        {
-            'symbol': 'TH_004',
-            'expected_return': 0.16,
-            'volatility': 0.20,
-            'dividend': 0.01,
-            'piotroski': 7,
-            'cmf': 0.18,
-        },
-        {
-            'symbol': 'TH_005',
-            'expected_return': 0.19,
-            'volatility': 0.24,
-            'dividend': 0.02,
-            'piotroski': 8,
-            'cmf': 0.25,
-        },
-    ]
-
     for stock in stocks:
         print(f"{stock['symbol']:10} | Return: {stock['expected_return']*100:5.1f}% | "
               f"Vol: {stock['volatility']*100:5.1f}% | Piotroski: {stock['piotroski']}/9 | CMF: {stock['cmf']:.2f}")
 
-    # ─── OPTIONS ANALYTICS ────────────────────────────────────────────────
 
-    print("\n" + "="*90)
-    print("📈 OPTIONS ANALYTICS - Implied Future Price Movements")
-    print("="*90)
+def print_options_analytics(stocks):
+    """Print ATM call/put prices, targets and Greeks for the top two stocks."""
+    _banner("📈 OPTIONS ANALYTICS - Implied Future Price Movements")
 
     for stock in stocks[:2]:  # Analyze top 2 stocks
-        spot = 100.0  # $100 current price
-        strike = 100.0  # At-the-money
-        days = 90
+        spot = OPTIONS_SPOT  # $100 current price
+        strike = OPTIONS_SPOT  # At-the-money
         vol = stock['volatility']
 
         print(f"\n{stock['symbol']} - Current Price: ${spot}")
-        print(f"─" * 60)
+        print("─" * 60)
 
-        options = analyze_options(spot, strike, days, vol)
+        options = analyze_options(spot, strike, OPTIONS_DAYS, vol)
+        up_pct = (options['upside_target']/spot - 1)*100
+        down_pct = (options['downside_target']/spot - 1)*100
 
         print(f"Call Price (ATM, 90d): ${options['call_price']:.2f}")
         print(f"Put Price (ATM, 90d):  ${options['put_price']:.2f}")
         print(f"\nExpected Price Move:    ±${options['expected_move']:.2f}")
-        print(f"Upside Target:          ${options['upside_target']:.2f} ({(options['upside_target']/spot - 1)*100:.1f}%)")
-        print(f"Downside Target:        ${options['downside_target']:.2f} ({(options['downside_target']/spot - 1)*100:.1f}%)")
+        print(f"Upside Target:          ${options['upside_target']:.2f} ({up_pct:.1f}%)")
+        print(f"Downside Target:        ${options['downside_target']:.2f} ({down_pct:.1f}%)")
 
-        print(f"\nGreeks:")
+        print("\nGreeks:")
         print(f"  Delta:  {options['greeks']['delta']:.4f} (price sensitivity)")
         print(f"  Gamma:  {options['greeks']['gamma']:.6f} (delta change rate)")
         print(f"  Vega:   {options['greeks']['vega']:.4f} (volatility sensitivity)")
@@ -379,87 +390,81 @@ def main():
 
         print(f"\nProb(Call ITM):         {options['probability_profit_call']*100:.1f}%")
 
-    # ─── PORTFOLIO OPTIMIZATION ──────────────────────────────────────────
 
-    print("\n" + "="*90)
-    print("💼 PORTFOLIO OPTIMIZATION - Efficient Allocation Strategies")
-    print("="*90 + "\n")
+def print_portfolio_optimization(stocks):
+    """Print each candidate portfolio's statistics and top-3 allocation."""
+    _banner("💼 PORTFOLIO OPTIMIZATION - Efficient Allocation Strategies", trailing_newline=True)
 
     portfolios = create_portfolios(stocks)
 
     for name, portfolio in portfolios.items():
         print(f"\n{name.upper().replace('_', ' ')}")
-        print(f"─" * 60)
+        print("─" * 60)
         print(f"Expected Return:  {portfolio['return']*100:.2f}%")
         print(f"Volatility:       {portfolio['volatility']*100:.2f}%")
         print(f"Sharpe Ratio:     {portfolio['sharpe_ratio']:.2f}")
         print(f"Dividend Yield:   {portfolio['dividend_yield']*100:.2f}%")
-        print(f"\nAllocation:")
+        print("\nAllocation:")
         for symbol, weight in list(portfolio['allocation'].items())[:3]:
             print(f"  {symbol}: {weight}")
 
-    # ─── 5-YEAR BACKTEST ────────────────────────────────────────────────
 
-    print("\n" + "="*90)
-    print("📊 5-YEAR HISTORICAL BACKTEST (Synthetic Historical Data)")
-    print("="*90)
-
+def attach_synthetic_prices(stocks, num_days=FIVE_YEARS_DAYS):
+    """Return copies of ``stocks`` with 'prices' from the seeded synthetic generator."""
     random.seed(42)
-
-    # Generate 5 years of historical data
-    five_years_days = 252 * 5
-
-    stocks_with_prices = []
-    for stock in stocks:
-        prices = generate_historical_prices(
+    return [
+        {**stock, 'prices': generate_historical_prices(
             symbol=stock['symbol'],
             base_price=100,
-            num_days=five_years_days,
+            num_days=num_days,
             annual_return=stock['expected_return'],
             annual_vol=stock['volatility'],
             trend='bullish',
-            start_date='2020-01-01'
-        )
-        stocks_with_prices.append({
-            **stock,
-            'prices': prices
-        })
-
-    # Simulate entry at different times over 5 years
-    entry_dates = [
-        '2020-01-15',
-        '2021-01-15',
-        '2022-01-15',
-        '2023-01-15',
+            start_date='2020-01-01',
+        )}
+        for stock in stocks
     ]
 
-    print(f"\nBacktest Period: 5 years (2020-2025)")
-    print(f"Entry Dates: {', '.join(entry_dates)}")
-    print(f"Holding Period: 252 days (1 year)")
+
+def print_cohort(entry_date, analysis):
+    """Print the statistics of one backtest cohort."""
+    print(f"\nCohort Entry {entry_date}:")
+    print(f"  Stocks:         {analysis['num_stocks']}")
+    print(f"  Avg Return:     {analysis['avg_return']:+.2f}%")
+    print(f"  Win Rate:       {analysis['win_rate']*100:.1f}%")
+    print(f"  Avg Win:        {analysis['avg_win']:.2f}%")
+    print(f"  Avg Loss:       {analysis['avg_loss']:.2f}%")
+    print(f"  Profit Factor:  {analysis['profit_factor']:.2f}x")
+    best, worst = analysis['best_performer'], analysis['worst_performer']
+    print(f"  Best:           {best['symbol']} (+{best['return_pct']:.1f}%)")
+    print(f"  Worst:          {worst['symbol']} ({worst['return_pct']:.1f}%)")
+
+
+def run_cohort_backtest(stocks):
+    """Run the 5-year cohort backtest, printing each cohort; returns the list of cohort analyses."""
+    _banner("📊 5-YEAR HISTORICAL BACKTEST (Synthetic Historical Data)")
+
+    stocks_with_prices = attach_synthetic_prices(stocks)
+
+    print("\nBacktest Period: 5 years (2020-2025)")
+    print(f"Entry Dates: {', '.join(ENTRY_DATES)}")
+    print("Holding Period: 252 days (1 year)")
     print()
 
     annual_results = []
-    for entry_date in entry_dates:
-        cohort = backtest_triple_hits(stocks_with_prices, entry_date, holding_period_days=252)
+    for entry_date in ENTRY_DATES:
+        cohort = backtest_triple_hits(stocks_with_prices, entry_date, holding_period_days=HOLDING_PERIOD_DAYS)
         analysis = analyze_backtest_cohort(cohort)
 
         if analysis:
             annual_results.append(analysis)
-            print(f"\nCohort Entry {entry_date}:")
-            print(f"  Stocks:         {analysis['num_stocks']}")
-            print(f"  Avg Return:     {analysis['avg_return']:+.2f}%")
-            print(f"  Win Rate:       {analysis['win_rate']*100:.1f}%")
-            print(f"  Avg Win:        {analysis['avg_win']:.2f}%")
-            print(f"  Avg Loss:       {analysis['avg_loss']:.2f}%")
-            print(f"  Profit Factor:  {analysis['profit_factor']:.2f}x")
-            print(f"  Best:           {analysis['best_performer']['symbol']} (+{analysis['best_performer']['return_pct']:.1f}%)")
-            print(f"  Worst:          {analysis['worst_performer']['symbol']} ({analysis['worst_performer']['return_pct']:.1f}%)")
+            print_cohort(entry_date, analysis)
+    return annual_results
 
-    # ─── SUMMARY STATISTICS ──────────────────────────────────────────────
 
-    print("\n" + "="*90)
-    print("📈 5-YEAR PERFORMANCE SUMMARY")
-    print("="*90 + "\n")
+def print_summary(annual_results):
+    """Print the cross-cohort summary statistics and the closing conclusion."""
+    _banner("📈 5-YEAR PERFORMANCE SUMMARY", trailing_newline=True)
 
     if annual_results:
         all_returns = [r['avg_return'] for r in annual_results]
@@ -472,16 +477,27 @@ def main():
         print(f"Average Profit Factor:  {statistics.mean(all_profit_factors):.2f}x")
     else:
         print("No backtest results available - check date matching")
-    print(f"\nConclusion:")
-    print(f"  ✓ Filter conditions (Darvas + Piotroski + Coffee Can + CMF)")
-    print(f"  ✓ Consistently identify high-return stocks")
-    print(f"  ✓ Portfolio of triple hits outperforms broader market")
-    print(f"  ✓ Options Greeks help time entry/exit")
-    print(f"  ✓ Portfolio optimization reduces risk")
+    print("\nConclusion:")
+    print("  ✓ Filter conditions (Darvas + Piotroski + Coffee Can + CMF)")
+    print("  ✓ Consistently identify high-return stocks")
+    print("  ✓ Portfolio of triple hits outperforms broader market")
+    print("  ✓ Options Greeks help time entry/exit")
+    print("  ✓ Portfolio optimization reduces risk")
 
-    print("\n" + "="*90)
-    print("✅ ANALYSIS COMPLETE")
-    print("="*90 + "\n")
+
+def main():
+    """Run the full demo: options analytics, portfolio optimisation, cohort backtest, summary."""
+    _banner("OPTIONS + PORTFOLIO OPTIMIZATION + 5-YEAR BACKTEST")
+
+    stocks = SAMPLE_TRIPLE_HITS
+    print_sample_stocks(stocks)
+    print_options_analytics(stocks)
+    print_portfolio_optimization(stocks)
+    annual_results = run_cohort_backtest(stocks)
+    print_summary(annual_results)
+
+    _banner("✅ ANALYSIS COMPLETE", trailing_newline=True)
+
 
 if __name__ == "__main__":
     random.seed(42)
