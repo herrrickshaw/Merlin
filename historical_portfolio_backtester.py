@@ -202,7 +202,7 @@ class HistoricalBacktester:
         # Calculate metrics
         total_return = returns_pct[-1] if returns_pct else 0
         days = len(self.daily_values)
-        years = days / 365.0
+        years = (days - 1) / 252.0          # daily_values are trading days: N values = N-1 daily steps
 
         annual_return = ((values[-1] / values[0]) ** (1 / years) - 1) * 100 if years > 0 else 0
 
@@ -216,7 +216,7 @@ class HistoricalBacktester:
         max_drawdown = np.min(drawdown)
 
         # Sharpe ratio
-        excess_returns = np.array(daily_returns) - (0.04 / 252)  # Risk-free rate
+        excess_returns = np.array(daily_returns) - (0.04 / 252 * 100)  # Risk-free rate, in % like daily_returns
         sharpe = np.mean(excess_returns) / np.std(excess_returns) * np.sqrt(252) if len(excess_returns) > 0 else 0
 
         return {

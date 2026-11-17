@@ -62,6 +62,7 @@ class FiveYearBacktester:
         daily_prices = []
         dates = pd.date_range(start=portfolio_date, end=end_date, freq='D')
 
+        current = {hit['symbol']: hit['price'] for hit in triple_hits}
         for date in dates:
             day_prices = {}
             days_elapsed = (date - portfolio_date).days
@@ -70,14 +71,16 @@ class FiveYearBacktester:
                 symbol = hit['symbol']
 
                 # Base return + market return + quality premium
-                quality_premium = (hit['piotroski'] / 9.0) * 0.08  # Up to 8% extra
+                quality_premium = (hit['piotroski'] / 9.0) * 0.08  # Up to 8% extra PER YEAR
                 daily_vol = 0.02 / np.sqrt(252)  # ~2% annual vol
 
-                # Price path (GBM)
-                daily_return = (market_return_pct / 100 / 252) + quality_premium + np.random.normal(0, daily_vol)
-                new_price = hit['price'] * (1 + daily_return) ** days_elapsed
+                # Price path: compound one day's return onto yesterday's price. (Previously the premium was
+                # added per DAY, and each day's single random draw was raised to the power days_elapsed.)
+                if days_elapsed > 0:
+                    daily_return = (market_return_pct / 100 / 252) + quality_premium / 252 + np.random.normal(0, daily_vol)
+                    current[symbol] *= (1 + daily_return)
 
-                day_prices[symbol] = new_price
+                day_prices[symbol] = current[symbol]
 
             daily_prices.append({
                 'date': date.strftime('%Y-%m-%d'),
