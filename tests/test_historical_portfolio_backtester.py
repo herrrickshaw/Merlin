@@ -18,7 +18,7 @@ def test_annual_return_of_one_trading_year_equals_total_return():
     vals = [1_000_000 * g ** i for i in range(253)]
     m = _bt(vals).calculate_metrics()
     assert m["total_return_pct"] == pytest.approx(10.0, abs=1e-6)
-    assert m["annual_return_pct"] == pytest.approx(10.0, abs=0.1)
+    assert m["annual_return_pct"] == pytest.approx(10.0, abs=1e-6)
 
 
 def test_sharpe_is_zero_when_mean_daily_return_equals_risk_free():
@@ -39,6 +39,8 @@ def test_max_drawdown_hand_computed():
 
 def test_metrics_need_two_points():
     assert _bt([100.0], start=100.0).calculate_metrics() is None
+    two = _bt([100.0, 110.0], start=100.0).calculate_metrics()
+    assert two is not None and two["total_return_pct"] == pytest.approx(10.0) and two["days"] == 2
 
 
 def test_quality_weighted_weights_sum_to_one_and_clip_negative_scores():
