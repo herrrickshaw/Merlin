@@ -61,6 +61,15 @@ def test_darvas_score_scales_with_proximity():
     assert r["passed"] and r["score"] == pytest.approx(10 - 4.0)
 
 
+def test_darvas_volume_multiple_exactly_one_and_a_half_passes():
+    v = vols()
+    v["volume"] = np.ones(260)
+    v["volume"][-20:-1] = [2.0] * 18 + [1.0]
+    v["volume"][-1] = 3.0                                     # avg20 = 2.0 exactly -> ratio exactly 1.5
+    r = F.darvas_box(prices(), v)
+    assert r["vol_mult"] == 1.5 and r["passed"]
+
+
 def test_darvas_zero_average_volume_and_zero_high():
     v = vols()
     v["volume"] = np.zeros(260)
@@ -220,6 +229,11 @@ def test_screen_market_resets_results(patched):
     assert s.screen_market({"USA": [stock("A", v=bullish_volumes())]})[0]["symbol"] == "A"
     s.screen_market({"USA": [stock("B", p=prices(last=50.0))]})
     assert s.results == []
+
+
+def test_screen_market_no_progress_line_before_ten(patched, capsys):
+    BatchScreener().screen_market({"USA": [stock(f"S{i}", p=prices(last=50.0)) for i in range(5)]})
+    assert "Processed:" not in capsys.readouterr().out
 
 
 def test_results_dataframe(patched):

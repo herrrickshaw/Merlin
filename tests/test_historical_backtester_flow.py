@@ -84,6 +84,13 @@ def test_daily_returns_values_and_start_filter():
     assert bt.daily_values == daily
 
 
+def test_daily_returns_includes_the_portfolio_date_itself():
+    bt = _bt()                                               # portfolio dated 2023-01-15
+    bt.portfolio["date_created"] = "2023-01-16"
+    fp = {"A": frame([10.0, 11.0], start="2023-01-16"), "B": frame([20.0, 21.0], start="2023-01-16")}
+    assert [d["date"] for d in bt.calculate_daily_returns(fp)] == ["2023-01-16", "2023-01-17"]
+
+
 def test_daily_returns_nearest_date_and_missing_symbols():
     bt = _bt()
     a = frame([10.0, 12.0], start="2023-01-16")

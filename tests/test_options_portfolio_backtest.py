@@ -124,6 +124,12 @@ def test_create_portfolios_weights():
     assert p["equal_weight"]["allocation"] == {"A": "50.0%", "B": "50.0%"}
 
 
+def test_create_portfolios_zero_total_volatility_has_zero_sharpe(monkeypatch):
+    monkeypatch.setattr(op, "portfolio_volatility", lambda stocks, weights: 0.0)
+    p = op.create_portfolios([A, B])
+    assert all(v["sharpe_ratio"] == 0 for v in p.values())
+
+
 def test_create_portfolios_zero_volatility_stock():
     z = dict(B, volatility=0.0)
     p = op.create_portfolios([A, z])

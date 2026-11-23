@@ -63,6 +63,13 @@ def test_simulated_stage_helpers():
     assert 0.40 < rate < 0.50                             # score > 0.55 passes ~45% of the time
 
 
+def test_coffee_can_threshold_is_strict(monkeypatch):
+    monkeypatch.setattr(tam.random, "random", lambda: 0.55)
+    assert tam.coffee_can_check() is False
+    monkeypatch.setattr(tam.random, "random", lambda: 0.5501)
+    assert tam.coffee_can_check() is True
+
+
 def test_generate_market_data():
     random.seed(2)
     s = tam.generate_market_data("SG")

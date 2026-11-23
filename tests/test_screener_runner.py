@@ -91,6 +91,12 @@ def test_darvas_boundaries():
     assert sr.darvas_screen(darvas_stock(95.0, 100.0, v)).passed
 
 
+def test_darvas_volume_multiple_must_reach_1_5x():
+    v = 1.45 * 1900 / 18.55                                    # 1.45x the 20d average
+    assert not sr.darvas_screen(darvas_stock(95.0, 100.0, v)).passed
+    assert sr.darvas_screen(darvas_stock(95.0, 100.0, 1.55 * 1900 / 18.45)).passed
+
+
 def test_darvas_insufficient_data_and_no_volume_history():
     assert sr.darvas_screen(StockData("E")).note == "insufficient_data"
     z = StockData("Z", ohlcv=bars([0.0] * 5, [0.0] * 5))
